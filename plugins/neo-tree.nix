@@ -1,3 +1,4 @@
+# plugins/neo-tree.nix
 { pkgs }: {
   enable = true;
   sources = [

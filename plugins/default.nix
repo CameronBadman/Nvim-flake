@@ -1,10 +1,8 @@
-# plugins/default.nix
 { pkgs }: {
-  lualine = (import ./lualine.nix { inherit pkgs; }).plugins.lualine;
-  neo-tree = (import ./neo-tree.nix { inherit pkgs; }).plugins.neo-tree;
-  telescope = (import ./telescope.nix { inherit pkgs; }).plugins.telescope;
-  lsp = (import ./lsp.nix { inherit pkgs; }).plugins.lsp;
-  
+  neo-tree = (import ./neo-tree.nix { inherit pkgs; });
+  lualine = (import ./lualine.nix { inherit pkgs; });
+  telescope = (import ./telescope.nix { inherit pkgs; });
+
   treesitter = {
     enable = true;
     ensureInstalled = [
