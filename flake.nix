@@ -19,50 +19,9 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       
-      # Common nixvim config to avoid duplication
-      commonConfig = {
-        globals.mapleader = " ";  # Set leader key
-
-keymaps = [
-    {
-      mode = "n";
-      key = "<leader>e";
-      action = ":Neotree focus<CR>";
-      options = {
-        silent = true;
-        desc = "Open and focus Neotree";
-      };
-    }
-  ];
+      # Import all modules through the default.nix
+      commonConfig = (import ./modules { inherit pkgs inputs; }) // {
         plugins = import ./plugins { inherit pkgs; };
-        
-        extraPackages = with pkgs; [
-          gopls rust-analyzer nodePackages.typescript-language-server
-          lua-language-server nil sonarlint-ls pylint shellcheck eslint
-          python311Packages.pip luarocks black stylua nodePackages.prettier
-          shfmt nixfmt codespell ripgrep fd wl-clipboard kubectl
-          clang-tools cpplint
-        ];
-        
-        colorschemes.kanagawa = {
-          enable = true;
-          theme = "wave";
-          transparent = true;
-        };
-        
-        extraPlugins = [
-          (pkgs.vimUtils.buildVimPlugin {
-            name = "kubectl-nvim";
-            src = inputs.kubectl-nvim;
-          })
-        ];
-        
-        extraConfigLua = ''
-          -- Enable transparency
-          vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-          vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-          vim.api.nvim_set_hl(0, "FloatBorder", { bg = "none" })
-        '';
       };
     in {
       homeManagerModules.default = { config, lib, ... }: {
