@@ -45,6 +45,11 @@
   
   # Enable snippet support
   luasnip.enable = true;
+  nvim-tree.view = {
+  number = true;
+  relativenumber = true
+  ;};
+
 
   # Diagnostics view
   trouble = {
