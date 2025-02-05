@@ -25,6 +25,10 @@
       };
     in {
       homeManagerModules.default = { config, lib, ... }: {
+        imports = [
+          nixvim.homeManagerModules.nixvim  # Import the nixvim module
+        ];
+        
         programs.nixvim = commonConfig // {
           enable = true;
           defaultEditor = true;
