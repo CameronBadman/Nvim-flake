@@ -1,77 +1,57 @@
 {
-  description = "Minimal Neovim Flake";
-  
+  description = "Basic Neovim Flake";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    flake-utils.url = "github:numtide/flake-utils";
   };
-  
-  outputs = { self, nixpkgs, home-manager }:
-    let
-      # Support multiple systems
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      pkgsFor = system: nixpkgs.legacyPackages.${system};
-    in {
-      packages = forAllSystems (system: {
-        default = (pkgsFor system).writeTextFile {
+  outputs = { self, nixpkgs, flake-utils }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        
+        neovimConfig = pkgs.stdenv.mkDerivation {
           name = "neovim-config";
-          destination = "/share/neovim-config";
-          text = ''
-            {
-              programs.neovim = {
-                enable = true;
-                defaultEditor = true;
-                viAlias = true;
-                vimAlias = true;
-                extraLuaConfig = '''
-                  vim.opt.number = true
-                  vim.opt.relativenumber = true
-                  vim.opt.cursorline = true
-                ''';
-              }
-            }
+          src = ./.;
+          installPhase = ''
+            mkdir -p $out
+            cp -r * $out/
           '';
         };
-      });
-
-      homeConfigurations = {
-        "nvim-x86_64-darwin" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgsFor "x86_64-darwin";
-          modules = [{
-            programs.neovim = {
-              enable = true;
-              defaultEditor = true;
-              viAlias = true;
-              vimAlias = true;
-              extraLuaConfig = ''
-                vim.opt.number = true
-                vim.opt.relativenumber = true
-                vim.opt.cursorline = true
-              '';
+        
+        nvim-config = pkgs.neovim.override {
+          configure = {
+            customRC = ''
+              lua << EOF
+              package.path = '${neovimConfig}/?.lua;${neovimConfig}/?/init.lua;' .. package.path
+              require('lua.init')
+              EOF
+            '';
+            packages.myPlugins = with pkgs.vimPlugins; {
+              start = [
+                telescope-nvim
+                plenary-nvim
+                neo-tree-nvim
+                nui-nvim
+                nvim-web-devicons
+                (nvim-treesitter.withPlugins (plugins: with plugins; [
+                  lua
+                  nix
+                  python
+                  javascript
+                  typescript
+                  rust
+                  # Add any other languages you want
+                ]))
+              ];
             };
-          }];
+          };
         };
-
-        "nvim-x86_64-linux" = home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgsFor "x86_64-linux";
-          modules = [{
-            programs.neovim = {
-              enable = true;
-              defaultEditor = true;
-              viAlias = true;
-              vimAlias = true;
-              extraLuaConfig = ''
-                vim.opt.number = true
-                vim.opt.relativenumber = true
-                vim.opt.cursorline = true
-              '';
-            };
-          }];
+      in {
+        packages.default = nvim-config;
+        
+        devShells.default = pkgs.mkShell {
+          packages = [ nvim-config ];
         };
-      };
-    };
+      }
+    );
 }
