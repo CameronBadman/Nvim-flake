@@ -17,3 +17,19 @@ vim.opt.termguicolors = true
 vim.opt.scrolloff = 8
 vim.opt.updatetime = 50
 
+-- Kanagawa theme setup
+require('kanagawa').setup({
+    transparent = true,     -- Enable transparency
+    theme = "dragon",       -- Load the dragon variant
+    background = {         -- Customize the background color
+        dark = "dragon",
+        light = "lotus"
+    },
+})
+
+-- Set the colorscheme
+vim.cmd("colorscheme kanagawa")
+
+-- Additional transparency settings if needed
+vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })

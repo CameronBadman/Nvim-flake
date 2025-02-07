@@ -33,6 +33,8 @@
                 neo-tree-nvim
                 nui-nvim
                 nvim-web-devicons
+                kanagawa-nvim
+                lualine-nvim
                 (nvim-treesitter.withPlugins (plugins: with plugins; [
                   lua
                   nix
@@ -40,6 +42,7 @@
                   javascript
                   typescript
                   rust
+                  
                   # Add any other languages you want
                 ]))
               ];

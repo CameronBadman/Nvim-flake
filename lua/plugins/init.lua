@@ -2,3 +2,4 @@
 require('lua.plugins.telescope')
 require('lua.plugins.neo-tree')
 require('lua.plugins.treesitter')
+require('lua.plugins.lualine')
