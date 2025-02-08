@@ -17,6 +17,15 @@
             cp -r * $out/
           '';
         };
+
+        # Base packages that neovim needs
+        basePackages = with pkgs; [
+          git
+          ripgrep
+          fd
+        ];
+        
+        # Development specific packages
         extraPackages = with pkgs; [
           # LSP servers
           python311Packages.python-lsp-server
@@ -34,11 +43,6 @@
           nixpkgs-fmt
           stylua
           rustfmt
-
-          # Additional tools
-          ripgrep
-          fd
-          git
         ];
         
         nvim-config = pkgs.neovim.override {
@@ -112,12 +116,13 @@
           viAlias = true;
           vimAlias = true;
           withPython3 = true;
-          extraMakeWrapperArgs = ''--prefix PATH : "${pkgs.lib.makeBinPath extraPackages}"'';
+          extraMakeWrapperArgs = ''--prefix PATH : "${pkgs.lib.makeBinPath (basePackages ++ extraPackages)}"'';
         };
 
         nvim-wrapped = pkgs.writeScriptBin "nvim" ''
           #!${pkgs.bash}/bin/bash
           if [ "$EUID" -ne 0 ]; then
+            export PATH="${pkgs.lib.makeBinPath basePackages}:$PATH"
             exec ${nvim-config}/bin/nvim "$@"
           else
             exec sudo -E ${nvim-config}/bin/nvim "$@"
@@ -131,7 +136,7 @@
         };
         
         devShells.default = pkgs.mkShell {
-          packages = [ nvim-wrapped ];
+          packages = [ nvim-wrapped ] ++ basePackages;
         };
       }
     );
