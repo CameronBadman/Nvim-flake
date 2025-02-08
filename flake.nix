@@ -1,5 +1,5 @@
 {
-  description = "Basic Neovim Flake";
+  description = "Neovim Flake with Vim alias";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -42,15 +42,18 @@
                   javascript
                   typescript
                   rust
-                  
-                  # Add any other languages you want
                 ]))
               ];
             };
           };
         };
       in {
-        packages.default = nvim-config;
+        packages = {
+          default = nvim-config;
+          nvim = nvim-config;
+          vim = nvim-config;
+          vi = nvim-config; 
+        };
         
         devShells.default = pkgs.mkShell {
           packages = [ nvim-config ];
