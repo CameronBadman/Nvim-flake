@@ -17,6 +17,29 @@
             cp -r * $out/
           '';
         };
+        extraPackages = with pkgs; [
+          # LSP servers
+          python311Packages.python-lsp-server
+          python311Packages.python-lsp-black
+          python311Packages.python-lsp-ruff
+          python311Packages.pylsp-mypy
+          nodePackages_latest.typescript-language-server
+          rust-analyzer
+          sumneko-lua-language-server
+          nil                     # Nix LSP
+          
+          # Formatters and linters
+          black
+          ruff
+          nixpkgs-fmt
+          stylua
+          rustfmt
+
+          # Additional tools
+          ripgrep
+          fd
+          git
+        ];
         
         nvim-config = pkgs.neovim.override {
           configure = {
@@ -28,6 +51,7 @@
             '';
             packages.myPlugins = with pkgs.vimPlugins; {
               start = [
+                # Core plugins
                 telescope-nvim
                 plenary-nvim
                 neo-tree-nvim
@@ -35,6 +59,36 @@
                 nvim-web-devicons
                 kanagawa-nvim
                 lualine-nvim
+                vim-visual-multi
+
+                # Git integration
+                vim-fugitive
+                gitsigns-nvim
+                vim-rhubarb
+
+                # Enhanced editing
+                vim-surround
+                vim-repeat
+                comment-nvim
+                nvim-autopairs
+                indent-blankline-nvim
+                which-key-nvim
+
+                # LSP Support
+                nvim-lspconfig
+                mason-nvim
+                mason-lspconfig-nvim
+                
+                # Completion
+                nvim-cmp
+                cmp-nvim-lsp
+                cmp-buffer
+                cmp-path
+                luasnip
+                cmp_luasnip
+                friendly-snippets
+
+                # Treesitter
                 (nvim-treesitter.withPlugins (plugins: with plugins; [
                   lua
                   nix
@@ -42,13 +96,25 @@
                   javascript
                   typescript
                   rust
+                  bash
+                  markdown
+                  json
+                  yaml
+                  toml
+                  git_rebase
+                  gitcommit
+                  gitignore
+                  diff
                 ]))
               ];
             };
           };
+          viAlias = true;
+          vimAlias = true;
+          withPython3 = true;
+          extraMakeWrapperArgs = ''--prefix PATH : "${pkgs.lib.makeBinPath extraPackages}"'';
         };
 
-        # Create a wrapped version that preserves environment
         nvim-wrapped = pkgs.writeScriptBin "nvim" ''
           #!${pkgs.bash}/bin/bash
           if [ "$EUID" -ne 0 ]; then
@@ -57,7 +123,6 @@
             exec sudo -E ${nvim-config}/bin/nvim "$@"
           fi
         '';
-
       in {
         packages = {
           default = nvim-wrapped;
