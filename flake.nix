@@ -1,5 +1,5 @@
 {
-  description = "Neovim Flake with Vim alias";
+  description = "Basic Neovim Flake";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -47,16 +47,26 @@
             };
           };
         };
+
+        # Create a wrapped version that preserves environment
+        nvim-wrapped = pkgs.writeScriptBin "nvim" ''
+          #!${pkgs.bash}/bin/bash
+          if [ "$EUID" -ne 0 ]; then
+            exec ${nvim-config}/bin/nvim "$@"
+          else
+            exec sudo -E ${nvim-config}/bin/nvim "$@"
+          fi
+        '';
+
       in {
         packages = {
-          default = nvim-config;
-          nvim = nvim-config;
-          vim = nvim-config;
-          vi = nvim-config; 
+          default = nvim-wrapped;
+          nvim = nvim-wrapped;
+          vim = nvim-wrapped;
         };
         
         devShells.default = pkgs.mkShell {
-          packages = [ nvim-config ];
+          packages = [ nvim-wrapped ];
         };
       }
     );
