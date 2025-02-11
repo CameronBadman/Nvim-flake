@@ -17,7 +17,6 @@
             cp -r * $out/
           '';
         };
-
         # Base packages that neovim needs
         basePackages = with pkgs; [
           git
@@ -25,17 +24,26 @@
           fd
         ];
         
-        # Development specific packages
         extraPackages = with pkgs; [
           # LSP servers
           python311Packages.python-lsp-server
           python311Packages.python-lsp-black
           python311Packages.python-lsp-ruff
           python311Packages.pylsp-mypy
+          python311Packages.pylint
           nodePackages_latest.typescript-language-server
           rust-analyzer
           sumneko-lua-language-server
           nil                     # Nix LSP
+          gopls                   # Go LSP
+          
+          # Go tools
+          go
+          golangci-lint
+          delve
+          gore
+          gotools
+          gotests
           
           # Formatters and linters
           black
@@ -43,6 +51,12 @@
           nixpkgs-fmt
           stylua
           rustfmt
+          pylint
+          
+          # Additional tools
+          ripgrep
+          fd
+          git
         ];
         
         nvim-config = pkgs.neovim.override {
@@ -109,6 +123,9 @@
                   gitcommit
                   gitignore
                   diff
+                  go          # Added Go
+                  gomod      # Added Go modules
+                  gowork    # Added Go workspace
                 ]))
               ];
             };
