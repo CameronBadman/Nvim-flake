@@ -1,38 +1,25 @@
--- lua/plugins/treesitter.lua
 require('nvim-treesitter.configs').setup({
-  -- Syntax highlighting
+  -- All your existing config stays the same
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
   },
-
-  -- Indentation
   indent = {
     enable = true,
   },
-
-  -- Auto tag management (closing HTML/XML tags)
   autotag = {
     enable = true,
   },
-
-  -- Code folding
   fold = {
     enable = true,
   },
-
-  -- Auto pairs
   autopairs = {
     enable = true,
   },
-
-  -- Context
   context_commentstring = {
     enable = true,
     enable_autocmd = false,
   },
-
-  -- Better incremental selection
   incremental_selection = {
     enable = true,
     keymaps = {

@@ -6,9 +6,15 @@
   };
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        
+       let
+  pkgs = import nixpkgs {
+    inherit system;
+    config = {
+      allowUnfree = true;
+    };
+  };
+
+
         neovimConfig = pkgs.stdenv.mkDerivation {
           name = "neovim-config";
           src = ./.;
@@ -36,6 +42,8 @@
           sumneko-lua-language-server
           nil                     # Nix LSP
           gopls                   # Go LSP
+          terraform-ls
+          terraform
           
           # Go tools
           go
