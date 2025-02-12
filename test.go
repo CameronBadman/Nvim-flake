@@ -1,103 +1,151 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"log" // unused import
-	"sync"
-	"time"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io/ioutil" // deprecated package
+    "net/http"
+    "time"
+    "unsafe"
 )
 
-// BadName should be named better
-type BadName interface {
-	// missing documentation for method
-	DoThing() error
+// Poorly aligned struct (should trigger staticcheck's struct alignment check)
+type poorlyAlignedStruct struct {
+    a             int
+    b             string
+    c             float64
+    d             bool
+    longFieldName int
 }
 
-// Config missing field documentation
-type Config struct {
-	name    string // should be exported
-	timeout time.Duration
-	mu      sync.Mutex // should be pointer
+// Deprecated function
+// Deprecated: Use NewCalculator instead
+type Calculator struct {
+    value int
 }
 
-func (c *Config) validate() error {
-	c.mu.Lock()
-	// missing defer unlock
-	c.name = "test"
-	c.mu.Unlock()
-	return nil
+// Deprecated: Use NewCalculator instead
+func NewCalc() *Calculator {
+    return &Calculator{value: 0}
 }
 
-func processData(ctx context.Context, data []string) error {
-	// potential nil panic
-	var ptr *string
-	fmt.Println(*ptr)
-
-	// leaked goroutine
-	done := make(chan bool)
-	go func() {
-		time.Sleep(time.Second)
-		done <- true
-	}()
-
-	// incorrect range loop
-	for i := 0; i <= len(data); i++ {
-		// potential panic
-		fmt.Println(data[i])
-	}
-
-	// inefficient string building
-	var result string
-	for i := 0; i < 10; i++ {
-		result += "a"
-	}
-
-	// shadowed variable
-	err := fmt.Errorf("test")
-	if true {
-		err := fmt.Errorf("another")
-		_ = err
-	}
-
-	// naked return
-	return err
-}
-
-func unusedParam(s string, unused int) error {
-	// could be made into constant
-	timeout := 300 * time.Second
-	_ = timeout
-
-	// unnecessary else
-	if s != "" {
-		return nil
-	} else {
-		return fmt.Errorf("empty string")
-	}
+func (c *Calculator) Add(x int) {
+    c.value += x
 }
 
 func main() {
-	// improper context usage
-	ctx := context.Background()
+    // Unused variable
+    unused := 42
 
-	// improper error handling
-	if err := processData(ctx, []string{"test"}); err != nil {
-		log.Println(err) // using log.Println for errors
-		return
-	}
+    // Shadowed variable
+    x := 10
+    if true {
+        x := 20
+        fmt.Println(x)
+    }
 
-	// empty critical section
-	var mu sync.Mutex
-	mu.Lock()
-	mu.Unlock()
+    // Deprecated package usage
+    data, _ := ioutil.ReadFile("test.txt")
+    fmt.Println(string(data))
 
-	// using time.Now().Sub instead of time.Since
-	start := time.Now()
-	elapsed := time.Now().Sub(start)
-	_ = elapsed
+    // Unhandled error
+    file, _ := os.Open("missing.txt")
+    defer file.Close()
 
-	// channel operation will deadlock
-	ch := make(chan int)
-	ch <- 1
+    // Type mismatch
+    var y int = "hello" // should trigger type check error
+
+    // Unused parameter
+    testUnusedParam(10)
+
+    // Testing struct alignment
+    s := poorlyAlignedStruct{
+        a:    1,
+        b:    "test",
+        c:    3.14,
+        d:    true,
+        longFieldName: 100,
+    }
+    fmt.Println(s)
+
+    // Testing deprecated function
+    calc := NewCalc()
+    calc.Add(5)
+    calc.Subtract(2)
+    fmt.Println("Calculator value:", calc.value)
+
+    // Testing unsafe pointer usage
+    ptr := unsafe.Pointer(&x)
+    fmt.Println(ptr)
+
+    // Testing HTTP response handling
+    resp, err := http.Get("https://example.com")
+    if err != nil {
+        fmt.Println("Error making request:", err)
+    }
+    // Missing resp.Body.Close() (should trigger httpresponse analysis)
+
+    // Testing time format issues
+    t := time.Now()
+    fmt.Println(t.Format("2006-01-02")) // Correct format
+    fmt.Println(t.Format("2023-01-02")) // Incorrect format (should trigger timeformat analysis)
+
+    // Testing unmarshal issues
+    var result map[string]interface{}
+    json.Unmarshal([]byte(`{"key": "value"}`), &result) // Missing error handling (should trigger unmarshal analysis)
+
+    // Testing loop closure issues
+    var funcs []func()
+    for i := 0; i < 3; i++ {
+        funcs = append(funcs, func() {
+            fmt.Println(i) // Should trigger loopclosure analysis (captures loop variable)
+        })
+    }
+    for _, f := range funcs {
+        f()
+    }
+}
+
+func testUnusedParam(a int) { // unused parameter
+    var b int // unused variable
+    fmt.Println("This function has unused parameters and variables")
+}
+
+func missingReturn() error {
+    // This should trigger a fillreturns suggestion
+}
+
+func unusedFunction() {
+    fmt.Println("This function is never used")
+}
+
+// Function with unhandled error
+func writeToFile(filename string, data []byte) {
+    file, _ := os.Create(filename)
+    defer file.Close()
+    file.Write(data)
+}
+
+// Function with incorrect return type
+func incorrectReturn() int {
+    return "not an int" // should trigger type check error
+}
+
+// Function with unreachable code
+func unreachableCode() {
+    return
+    fmt.Println("This code is unreachable")
+}
+
+// Function with nil dereference potential
+func nilDereference() {
+    var ptr *int
+    fmt.Println(*ptr) // should trigger nilness analysis
+}
+
+// Function with shadowed import
+func shadowedImport() {
+    fmt := "shadowed"
+    fmt.Println(fmt) // should trigger shadow analysis
 }

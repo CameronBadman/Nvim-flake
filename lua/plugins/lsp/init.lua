@@ -1,8 +1,8 @@
 local lsp_zero = require('lsp-zero')
-
 local M = {}
 
 function M.setup()
+    -- Initialize lsp-zero with preset
     lsp_zero.preset({
         name = 'recommended',
         set_lsp_keymaps = true,
@@ -10,20 +10,12 @@ function M.setup()
         suggest_lsp_servers = true,
     })
 
-    -- Configure servers
-    require('lua.plugins.lsp.settings.gopls').setup(lsp_zero)
+    -- Load language server configurations
+    require('lua.plugins.lsp.servers.gopls').setup()
+    require('lua.plugins.lsp.servers.python').setup()
+    require('lua.plugins.lsp.servers.javascript').setup()   
 
-    -- Set up keymaps
-    lsp_zero.on_attach(function(client, bufnr)
-        local opts = {buffer = bufnr}
-        vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-        vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-        vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-        vim.keymap.set('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
-        vim.keymap.set('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-        vim.keymap.set('n', '<leader>f', '<cmd>lua vim.lsp.buf.format()<cr>', opts)
-    end)
-
+    -- Set up lsp-zero
     lsp_zero.setup()
 
     -- Configure diagnostics

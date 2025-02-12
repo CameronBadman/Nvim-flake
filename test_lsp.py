@@ -1,28 +1,31 @@
-from collections import OrderedDict
+# test_python.py
+import os  # unused import (should trigger F401)
+from typing import Optional
 
-class NumberContainers:
-    def __init__(self):
-        self._numbersToContainer: dict[int, int] = {}
-        
-    def change(self, index: int, number: int) -> None:
-        self._numbersToContainer[index] = number
-        
-    def find(self, number: int) -> int:
-        matching_keys = [key for key, value in self._numbersToContainer.items() if value == number]
-        return min(matching_keys) if matching_keys else -1
-index = 1
-obj = NumberContainers()
-obj.change(index,number)
-obj.change(1,1)
-obj.change(2,1)
-obj.change(3,2)
+def greet(name: Optional[str] = None) -> str:
+    if name is None:
+        return "Hello, World!"
+    return f"Hello, {name}!"
 
+def unused_function():  # unused function (should trigger pyright hint)
+    pass
 
+x = 10  # unused variable (should trigger F841)
+x = 20  # shadowed variable (should trigger ruff warning)
 
+# Incorrect type hint (should trigger pyright error)
+def add(a: int, b: int) -> str:
+    return a + b
 
+# Unhandled exception (should trigger ruff warning)
+def divide(a: int, b: int) -> float:
+    return a / b
 
+# Incorrect time format (should trigger ruff warning)
+from datetime import datetime
+print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))  # correct
+print(datetime.now().strftime("%Y/%m/%d"))  # incorrect
 
-
-param_2 = obj.find(number)
-
-print(param_2)
+# Unused class (should trigger pyright hint)
+class UnusedClass:
+    pass

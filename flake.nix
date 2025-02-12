@@ -58,6 +58,8 @@
           ripgrep
           fd
           git
+          nodePackages.typescript-language-server
+          nodePackages.typescript-language-server
         ];
         
         nvim-config = pkgs.neovim.override {
