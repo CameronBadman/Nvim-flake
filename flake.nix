@@ -44,6 +44,7 @@
           gore
           gotools
           gotests
+          gofumpt                # Added for Go formatting
           
           # Formatters and linters
           black
@@ -78,6 +79,7 @@
                 kanagawa-nvim
                 lualine-nvim
                 vim-visual-multi
+                trouble-nvim
 
                 # Git integration
                 vim-fugitive
@@ -96,12 +98,15 @@
                 nvim-lspconfig
                 mason-nvim
                 mason-lspconfig-nvim
+                lsp-zero-nvim      # Added
+                neodev-nvim        # Added for Lua development
                 
                 # Completion
                 nvim-cmp
                 cmp-nvim-lsp
                 cmp-buffer
                 cmp-path
+                cmp-nvim-lua       # Added
                 luasnip
                 cmp_luasnip
                 friendly-snippets

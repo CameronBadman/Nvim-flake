@@ -1,70 +1,103 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log" // unused import
 	"sync"
+	"time"
 )
 
-// Person represents a person with a name and age
-type Person struct {
-	name string // This will test field alignment hints
-	Age  int    // This will test exported field hints
+// BadName should be named better
+type BadName interface {
+	// missing documentation for method
+	DoThing() error
 }
 
-// This function will test unused parameter warnings
-func unusedParamTest(name string, age int) {
-	fmt.Println("Hello")
+// Config missing field documentation
+type Config struct {
+	name    string // should be exported
+	timeout time.Duration
+	mu      sync.Mutex // should be pointer
 }
 
-// This will test nil pointer detection
-func nilTest(p *Person) {
-	fmt.Println(p.name) // LSP should warn about possible nil pointer
-}
-
-// This will test shadow variable detection
-func shadowTest() {
-	x := 5
-	{
-		x := 10 // LSP should warn about shadowed variable
-		fmt.Println(x)
-	}
-}
-
-// This will test lock copying detection
-type Counter struct {
-	mu sync.Mutex
-	count int
-}
-
-// This should trigger a copylocks warning
-func (c Counter) increment() { // LSP should warn about copying mutex
+func (c *Config) validate() error {
 	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.count++
+	// missing defer unlock
+	c.name = "test"
+	c.mu.Unlock()
+	return nil
+}
+
+func processData(ctx context.Context, data []string) error {
+	// potential nil panic
+	var ptr *string
+	fmt.Println(*ptr)
+
+	// leaked goroutine
+	done := make(chan bool)
+	go func() {
+		time.Sleep(time.Second)
+		done <- true
+	}()
+
+	// incorrect range loop
+	for i := 0; i <= len(data); i++ {
+		// potential panic
+		fmt.Println(data[i])
+	}
+
+	// inefficient string building
+	var result string
+	for i := 0; i < 10; i++ {
+		result += "a"
+	}
+
+	// shadowed variable
+	err := fmt.Errorf("test")
+	if true {
+		err := fmt.Errorf("another")
+		_ = err
+	}
+
+	// naked return
+	return err
+}
+
+func unusedParam(s string, unused int) error {
+	// could be made into constant
+	timeout := 300 * time.Second
+	_ = timeout
+
+	// unnecessary else
+	if s != "" {
+		return nil
+	} else {
+		return fmt.Errorf("empty string")
+	}
 }
 
 func main() {
-	// Test completion
-	p := Person{
-		// LSP should provide completion here
+	// improper context usage
+	ctx := context.Background()
+
+	// improper error handling
+	if err := processData(ctx, []string{"test"}); err != nil {
+		log.Println(err) // using log.Println for errors
+		return
 	}
 
-	// Test type hints
-	nums := []int{1, 2, 3} // LSP should show type information
-	for _, num := range nums {
-		// LSP should show type hints for range variables
-		fmt.Println(num)
-	}
+	// empty critical section
+	var mu sync.Mutex
+	mu.Lock()
+	mu.Unlock()
 
-	// Test unused variable warning
-	unused := "test"
+	// using time.Now().Sub instead of time.Since
+	start := time.Now()
+	elapsed := time.Now().Sub(start)
+	_ = elapsed
 
-	// Test interface assertion
-	var i interface{} = "hello"
-	_, ok := i.(string)
-	if !ok {
-		fmt.Println("not a string")
-	}
-
-	nilTest(nil) // Should trigger nil warning
+	// channel operation will deadlock
+	ch := make(chan int)
+	ch <- 1
 }
