@@ -44,6 +44,9 @@
           gopls                   # Go LSP
           terraform-ls
           terraform
+          haskell-language-server # Added for Haskell LSP
+          hlint                   # Added for Haskell linting
+          ormolu                  # Added for Haskell formatting
           
           # Go tools
           go
@@ -53,6 +56,8 @@
           gotools
           gotests
           gofumpt                # Added for Go formatting
+
+
           
           # Formatters and linters
           black
@@ -141,6 +146,7 @@
                   go          # Added Go
                   gomod      # Added Go modules
                   gowork    # Added Go workspace
+                  haskell
                 ]))
               ];
             };

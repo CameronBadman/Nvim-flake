@@ -1,14 +1,28 @@
+-- lua/plugins/lsp/servers/python.lua
 local lspconfig = require('lspconfig')
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local keymaps = require('lua.plugins.lsp.keymaps') -- Assuming you have keymaps setup
+local keymaps = require('lua.plugins.lsp.keymaps')
+local format = require('lua.plugins.lsp.format')
 local M = {}
 
 function M.setup()
+    -- Python-specific format settings
+    local format_opts = {
+        async = true,
+        format_on_save = false,
+        timeout_ms = 3000,
+        formatting_options = {
+            line_length = 88,  -- Black default
+            indent_size = 4,
+        }
+    }
+
     -- Pyright setup for type checking
     lspconfig.pyright.setup({
         capabilities = capabilities,
         on_attach = function(client, bufnr)
             keymaps.set_keymaps(client, bufnr)
+            -- Pyright doesn't handle formatting, so we don't set up format here
         end,
         settings = {
             python = {
@@ -48,15 +62,17 @@ function M.setup()
         },
     })
 
-    -- Ruff setup for linting
+    -- Ruff setup for linting and formatting
     lspconfig.ruff.setup({
         capabilities = capabilities,
         on_attach = function(client, bufnr)
             keymaps.set_keymaps(client, bufnr)
+            -- Set up formatting with Python-specific options
+            format.setup(client, bufnr, format_opts)
         end,
         settings = {
             ruff = {
-                lineLength = 88,
+                lineLength = format_opts.formatting_options.line_length,
                 select = {
                     "E",   -- pycodestyle errors
                     "F",   -- pyflakes
@@ -73,7 +89,7 @@ function M.setup()
                     "SIM", -- flake8-simplify
                     "PTH", -- flake8-use-pathlib
                     "PL",  -- pylint
-                    "RUF",  -- ruff-specific rules
+                    "RUF", -- ruff-specific rules
                 },
                 extendFixable = { "I" },
                 targetVersion = "py311",

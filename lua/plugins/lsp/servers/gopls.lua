@@ -1,10 +1,24 @@
+-- lua/plugins/lsp/servers/gopls.lua
 local lspconfig = require('lspconfig')
 local keymaps = require('lua.plugins.lsp.keymaps')
+local format = require('lua.plugins.lsp.format')
+
 local M = {}
 
 function M.setup()
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
     local util = require('lspconfig/util')
+
+    -- Go-specific format settings
+    local format_opts = {
+        async = false,  -- Go formatting is usually fast
+        format_on_save = false,
+        timeout_ms = 5000,
+        formatting_options = {
+            gofumpt = true,
+            indent_size = 8,
+        }
+    }
 
     lspconfig.gopls.setup({
         capabilities = capabilities,
@@ -62,21 +76,18 @@ function M.setup()
                     upgrade_dependency = true, -- Add dependency upgrade code lens
                 },
                 experimentalPostfixCompletions = true,
-                gofumpt = true,
+                -- Format settings
+                gofumpt = format_opts.formatting_options.gofumpt,
                 buildFlags = { "-tags", "integration" },
                 directoryFilters = { "-node_modules", "-.git", "-vendor" },
             }
         },
         on_attach = function(client, bufnr)
+            -- Set up keymaps
             keymaps.set_keymaps(client, bufnr)
-
-            -- Format on save
-            vim.api.nvim_create_autocmd("BufWritePre", {
-                buffer = bufnr,
-                callback = function()
-                    vim.lsp.buf.format({ async = false })
-                end
-            })
+            
+            -- Set up formatting with Go-specific options
+            format.setup(client, bufnr, format_opts)
         end
     })
 end
