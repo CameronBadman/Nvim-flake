@@ -12,7 +12,7 @@ function M.setup()
     -- Go-specific format settings
     local format_opts = {
         async = false,  -- Go formatting is usually fast
-        format_on_save = false,
+        format_on_save = true,
         timeout_ms = 5000,
         formatting_options = {
             gofumpt = true,
@@ -56,6 +56,7 @@ function M.setup()
                     timeformat = true,    -- Check for time format issues
                     unmarshal = true,     -- Check for unmarshal issues
                     unsafeptr = true,     -- Check for unsafe.Pointer usage
+                    fillreturns = true,   -- Add missing return statements
                 },
                 hints = {
                     assignVariableTypes = true,
@@ -76,6 +77,18 @@ function M.setup()
                     upgrade_dependency = true, -- Add dependency upgrade code lens
                 },
                 experimentalPostfixCompletions = true,
+                -- Import and formatting settings
+                importShortcut = "Definition",
+                matcher = "Fuzzy",
+                symbolMatcher = "fuzzy",
+                formatting = {
+                    gofumpt = true,
+                },
+                -- Additional completion settings
+                completionBudget = "100ms",
+                deepCompletion = true,
+                diagnosticsDelay = "500ms",
+                annotatesPkgErrors = true,
                 -- Format settings
                 gofumpt = format_opts.formatting_options.gofumpt,
                 buildFlags = { "-tags", "integration" },
@@ -88,6 +101,32 @@ function M.setup()
             
             -- Set up formatting with Go-specific options
             format.setup(client, bufnr, format_opts)
+            
+            -- Add auto-import organization and formatting on save
+            vim.api.nvim_create_autocmd("BufWritePre", {
+                buffer = bufnr,
+                callback = function()
+                    -- Organize imports
+                    local params = vim.lsp.util.make_range_params()
+                    params.context = {only = {"source.organizeImports"}}
+                    
+                    -- synchronously organize imports
+                    local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, 3000)
+                    if result and result[1] then
+                        for _, r in pairs(result[1].result or {}) do
+                            if r.edit then
+                                vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")  -- Changed from UTF-8 to utf-8
+                            end
+                        end
+                    end
+                    
+                    -- Then format
+                    vim.lsp.buf.format({ 
+                        bufnr = bufnr,
+                        timeout_ms = 5000
+                    })
+                end
+            })
         end
     })
 end
