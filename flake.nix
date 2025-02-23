@@ -31,49 +31,44 @@
         ];
         
         extraPackages = with pkgs; [
-          # LSP servers
-          python311Packages.python-lsp-server
-          python311Packages.python-lsp-black
-          python311Packages.python-lsp-ruff
-          python311Packages.pylsp-mypy
-          python311Packages.pylint
-          nodePackages_latest.typescript-language-server
-          rust-analyzer
-          sumneko-lua-language-server
-          nil                     # Nix LSP
-          gopls                   # Go LSP
-          terraform-ls
-          terraform
-          haskell-language-server # Added for Haskell LSP
-          hlint                   # Added for Haskell linting
-          ormolu                  # Added for Haskell formatting
-          
-          # Go tools
-          go
-          golangci-lint
-          delve
-          gore
-          gotools
-          gotests
-          gofumpt                # Added for Go formatting
-
-
-          
-          # Formatters and linters
-          black
-          ruff
-          nixpkgs-fmt
-          stylua
-          rustfmt
-          pylint
-          
-          # Additional tools
-          ripgrep
-          fd
-          git
-          nodePackages.typescript-language-server
-          nodePackages.typescript-language-server
-        ];
+  # LSP servers
+  python3Packages.python-lsp-server
+  python3Packages.python-lsp-black
+  python3Packages.python-lsp-ruff
+  python3Packages.pylint
+  nodePackages_latest.typescript-language-server
+  rust-analyzer
+  sumneko-lua-language-server
+  nil                     # Nix LSP
+  gopls                   # Go LSP
+  terraform-ls
+  terraform
+  haskell-language-server # Haskell LSP
+  hlint                   # Haskell linting
+  ormolu                  # Haskell formatting
+  
+  # Go tools
+  go
+  golangci-lint
+  delve
+  gore
+  gotools
+  gotests
+  gofumpt                # Go formatting
+  
+  # Formatters and linters
+  black
+  ruff
+  nixpkgs-fmt
+  stylua
+  rustfmt
+  
+  # Additional tools
+  ripgrep
+  fd
+  git
+  nodePackages.typescript-language-server
+];
         
         nvim-config = pkgs.neovim.override {
           configure = {
