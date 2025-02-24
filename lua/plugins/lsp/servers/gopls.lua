@@ -77,20 +77,16 @@ function M.setup()
                     upgrade_dependency = true, -- Add dependency upgrade code lens
                 },
                 experimentalPostfixCompletions = true,
-                -- Import and formatting settings
+                -- Import settings
                 importShortcut = "Definition",
                 matcher = "Fuzzy",
                 symbolMatcher = "fuzzy",
-                formatting = {
-                    gofumpt = true,
-                },
                 -- Additional completion settings
                 completionBudget = "100ms",
                 deepCompletion = true,
                 diagnosticsDelay = "500ms",
-                annotatesPkgErrors = true,
                 -- Format settings
-                gofumpt = format_opts.formatting_options.gofumpt,
+                gofumpt = true, -- Moved from formatting section
                 buildFlags = { "-tags", "integration" },
                 directoryFilters = { "-node_modules", "-.git", "-vendor" },
             }
@@ -115,7 +111,7 @@ function M.setup()
                     if result and result[1] then
                         for _, r in pairs(result[1].result or {}) do
                             if r.edit then
-                                vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")  -- Changed from UTF-8 to utf-8
+                                vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
                             end
                         end
                     end
