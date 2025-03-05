@@ -16,6 +16,7 @@ function M.setup()
     require('lua.plugins.lsp.servers.javascript').setup()   
     require('lua.plugins.lsp.servers.terraform').setup()   
     require('lua.plugins.lsp.servers.haskell').setup()
+    require('lua.plugins.lsp.servers.clangd').setup()
 
     -- Set up lsp-zero
     lsp_zero.setup()

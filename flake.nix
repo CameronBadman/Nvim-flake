@@ -46,6 +46,7 @@
   haskell-language-server # Haskell LSP
   hlint                   # Haskell linting
   ormolu                  # Haskell formatting
+  clang-tools
   
   # Go tools
   go
