@@ -1,5 +1,4 @@
-
--- lua/plugins/lsp/servers/gopls.lua
+-- lua/plugins/lsp/servers/clangd.lua
 local lspconfig = require('lspconfig')
 local keymaps = require('lua.plugins.lsp.keymaps')
 local format = require('lua.plugins.lsp.format')
@@ -8,124 +7,156 @@ local M = {}
 
 function M.setup()
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
-    local util = require('lspconfig/util')
 
-    -- Go-specific format settings
+    -- C-specific format settings for CSSE2310/CSSE7231 style (WebKit-based)
     local format_opts = {
-        async = false,  -- Go formatting is usually fast
+        async = false,
         format_on_save = true,
         timeout_ms = 5000,
         formatting_options = {
-            gofumpt = true,
-            indent_size = 8,
+            indent_size = 4,
+            tab_width = 4,
+            use_tabs = false,
         }
     }
 
-    lspconfig.gopls.setup({
+    -- Create .clang-format configuration for WebKit style with CSSE2310/CSSE7231 modifications
+    local function ensure_clang_format_config()
+        local config_path = vim.fn.getcwd() .. '/.clang-format'
+        if vim.fn.filereadable(config_path) == 0 then
+            local f = io.open(config_path, 'w')
+            if f then
+                f:write([[
+# CSSE2310/CSSE7231 style configuration (based on WebKit)
+BasedOnStyle: WebKit
+Language: Cpp
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 80  # Function and line length constraint
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Attach
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+IndentCaseLabels: true
+PointerAlignment: Right
+SortIncludes: false
+]])
+                f:close()
+                vim.notify("Created .clang-format file with CSSE2310/CSSE7231 style", vim.log.levels.INFO)
+            end
+        end
+    end
+
+    -- Create .clang-tidy configuration for additional requirements
+    local function ensure_clang_tidy_config()
+        local config_path = vim.fn.getcwd() .. '/.clang-tidy'
+        if vim.fn.filereadable(config_path) == 0 then
+            local f = io.open(config_path, 'w')
+            if f then
+                f:write([[
+# CSSE2310/CSSE7231 additional requirements
+Checks: 'readability-*,bugprone-*,cert-*,clang-analyzer-*,misc-*,-misc-unused-parameters,performance-*,portability-*'
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
+CheckOptions:
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-function-size.LineThreshold
+    value: 80
+  - key: readability-function-size.StatementThreshold
+    value: 50
+]])
+                f:close()
+                vim.notify("Created .clang-tidy file with CSSE2310/CSSE7231 requirements", vim.log.levels.INFO)
+            end
+        end
+    end
+
+    lspconfig.clangd.setup({
         capabilities = capabilities,
-        cmd = { "gopls", "serve" },
-        filetypes = { "go", "gomod", "gowork", "gotmpl" },
-        root_dir = util.root_pattern("go.work", "go.mod", ".git"),
-        settings = {
-            gopls = {
-                analyses = {
-                    unusedparams = true,
-                    unreachable = true,
-                    nilness = true,
-                    unusedwrite = true,
-                    useany = true,
-                    unusedvariable = true,
-                    lostcancel = true,
-                    printf = true,
-                    shadow = true,
-                    fieldalignment = false, -- Explicitly disable deprecated analysis
-                    staticcheck = true,   -- Enable staticcheck integration
-                    nilfunc = true,        -- Check for nil function calls
-                    nonewvars = true,      -- Warn on unused new variables
-                    undeclaredname = true, -- Check for undeclared names
-                    unusedresult = true,   -- Check for unused function results
-                    unusedstructs = true,  -- Check for unused struct fields
-                    deepequalerrors = true, -- Check for errors in deep equal
-                    embed = true,          -- Check for incorrect embed usage
-                    errorsas = true,      -- Check for errors.As usage
-                    httpresponse = true,   -- Check for unclosed HTTP responses
-                    ifaceassert = true,    -- Check for interface assertions
-                    loopclosure = true,    -- Check for loop variable capture
-                    noresultvalues = true, -- Check for missing result values
-                    testinggoroutine = true, -- Check for incorrect testing goroutines
-                    tests = true,         -- Check for test issues
-                    timeformat = true,    -- Check for time format issues
-                    unmarshal = true,     -- Check for unmarshal issues
-                    unsafeptr = true,     -- Check for unsafe.Pointer usage
-                    fillreturns = true,   -- Add missing return statements
-                },
-                hints = {
-                    assignVariableTypes = true,
-                    compositeLiteralFields = true,
-                    functionTypeParameters = true,
-                    parameterNames = true,
-                    rangeVariableTypes = true,
-                    constantValues = true, -- Show hints for constant values
-                },
-                completeUnimported = true,
-                usePlaceholders = true,
-                semanticTokens = true,
-                codelenses = {
-                    generate = true,
-                    gc_details = true,
-                    test = true,
-                    tidy = true,
-                    upgrade_dependency = true, -- Add dependency upgrade code lens
-                },
-                experimentalPostfixCompletions = true,
-                -- Import settings
-                importShortcut = "Definition",
-                matcher = "Fuzzy",
-                symbolMatcher = "fuzzy",
-                -- Additional completion settings
-                completionBudget = "100ms",
-                deepCompletion = true,
-                diagnosticsDelay = "500ms",
-                -- Format settings
-                gofumpt = true, -- Moved from formatting section
-                buildFlags = { "-tags", "integration" },
-                directoryFilters = { "-node_modules", "-.git", "-vendor" },
-            }
+        cmd = {
+            "clangd",
+            "--background-index",
+            "--clang-tidy",
+            "--header-insertion=iwyu",
+            "--completion-style=detailed",
+            "--function-arg-placeholders",
+            "--fallback-style=WebKit",
         },
+        filetypes = { "c", "h" },
+        root_dir = function(fname)
+            return lspconfig.util.root_pattern("compile_commands.json", ".git")(fname) or
+                   vim.fn.getcwd()
+        end,
         on_attach = function(client, bufnr)
             -- Set up keymaps
             keymaps.set_keymaps(client, bufnr)
             
-            -- Set up formatting with Go-specific options
+            -- Set up formatting with C-specific options
             format.setup(client, bufnr, format_opts)
             
-            -- Add auto-import organization and formatting on save
+            -- Ensure style configuration files exist
+            vim.defer_fn(function()
+                ensure_clang_format_config()
+                ensure_clang_tidy_config()
+            end, 1000)
+            
+            -- Add formatting on save
             vim.api.nvim_create_autocmd("BufWritePre", {
                 buffer = bufnr,
                 callback = function()
-                    -- Organize imports
-                    local params = vim.lsp.util.make_range_params()
-                    params.context = {only = {"source.organizeImports"}}
-                    
-                    -- synchronously organize imports
-                    local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, 3000)
-                    if result and result[1] then
-                        for _, r in pairs(result[1].result or {}) do
-                            if r.edit then
-                                vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
-                            end
-                        end
-                    end
-                    
-                    -- Then format
+                    -- Format the buffer
                     vim.lsp.buf.format({ 
                         bufnr = bufnr,
                         timeout_ms = 5000
                     })
                 end
             })
-        end
+            
+            -- Show diagnostics in hover
+            vim.api.nvim_create_autocmd("CursorHold", {
+                buffer = bufnr,
+                callback = function()
+                    local opts = {
+                        focusable = false,
+                        close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+                        border = 'rounded',
+                        source = 'always',
+                        prefix = ' ',
+                        scope = 'cursor',
+                    }
+                    vim.diagnostic.open_float(nil, opts)
+                end
+            })
+        end,
+        init_options = {
+            usePlaceholders = true,
+            completeUnimported = true,
+            clangdFileStatus = true
+        }
     })
+    
+    -- Debug print to check if clangd setup is being called
+    print("clangd LSP setup completed")
 end
 
 return M
