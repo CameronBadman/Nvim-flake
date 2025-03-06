@@ -1,5 +1,4 @@
 local M = {}
-
 M.get_mappings = function(cmp)
   -- Detect if running on macOS
   local is_mac = vim.fn.has('macunix') == 1
@@ -58,7 +57,25 @@ M.get_mappings = function(cmp)
     end
   end, { 'i', 's' })
   
+  -- Add Control-J and Control-K mappings specifically for macOS
+  if is_mac then
+    mappings['<C-j>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      else
+        fallback()
+      end
+    end, { 'i', 's' })
+    
+    mappings['<C-k>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      else
+        fallback()
+      end
+    end, { 'i', 's' })
+  end
+  
   return mappings
 end
-
 return M
