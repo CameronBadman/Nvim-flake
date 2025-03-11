@@ -1,5 +1,5 @@
 {
-  description = "Basic Neovim Flake";
+  description = "Neovim Flake with Markdown Support";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -14,6 +14,8 @@
     };
   };
 
+        # Import our markdown LSP module
+        markdownModule = import ./modules/markdown-lsp.nix { inherit pkgs; lib = pkgs.lib; };
 
         neovimConfig = pkgs.stdenv.mkDerivation {
           name = "neovim-config";
@@ -21,8 +23,13 @@
           installPhase = ''
             mkdir -p $out
             cp -r * $out/
+            
+            # Create the efm config directory
+            mkdir -p $out/efm-config
+            ln -s ${markdownModule.pkgs.efmConfig} $out/efm-config/markdown.yaml
           '';
         };
+        
         # Base packages that neovim needs
         basePackages = with pkgs; [
           git
@@ -30,6 +37,7 @@
           fd
         ];
         
+        # Merge our markdown dependencies with other packages
         extraPackages = with pkgs; [
   # LSP servers
   python3Packages.python-lsp-server
@@ -69,7 +77,7 @@
   fd
   git
   nodePackages.typescript-language-server
-];
+] ++ markdownModule.dependencies; # Add Markdown-specific dependencies
         
         nvim-config = pkgs.neovim.override {
           configure = {
@@ -91,6 +99,7 @@
                 lualine-nvim
                 vim-visual-multi
                 trouble-nvim
+                render-markdown-nvim
 
                 # Git integration
                 vim-fugitive
@@ -109,18 +118,29 @@
                 nvim-lspconfig
                 mason-nvim
                 mason-lspconfig-nvim
-                lsp-zero-nvim      # Added
-                neodev-nvim        # Added for Lua development
+                lsp-zero-nvim
+                neodev-nvim
                 
                 # Completion
                 nvim-cmp
                 cmp-nvim-lsp
                 cmp-buffer
                 cmp-path
-                cmp-nvim-lua       # Added
+                cmp-nvim-lua
                 luasnip
                 cmp_luasnip
                 friendly-snippets
+
+                # Markdown specific plugins
+                markdown-preview-nvim        # Live preview
+                vim-table-mode               # Table creation/formatting
+                vim-markdown                 # Extended Markdown support
+                headlines-nvim               # Better headings
+                mkdnflow-nvim                # Markdown workflows
+                zk-nvim                      # Simple note-taking
+                
+                # Spelling and grammar
+                vim-grammarous              # Grammar checking integrated
 
                 # Treesitter
                 (nvim-treesitter.withPlugins (plugins: with plugins; [
@@ -132,6 +152,7 @@
                   rust
                   bash
                   markdown
+                  markdown_inline
                   json
                   yaml
                   toml
@@ -139,9 +160,9 @@
                   gitcommit
                   gitignore
                   diff
-                  go          # Added Go
-                  gomod      # Added Go modules
-                  gowork    # Added Go workspace
+                  go
+                  gomod
+                  gowork
                   haskell
                 ]))
               ];
@@ -153,12 +174,14 @@
           extraMakeWrapperArgs = ''--prefix PATH : "${pkgs.lib.makeBinPath (basePackages ++ extraPackages)}"'';
         };
 
+        # Wrap nvim and add our custom efm-langserver to the path
         nvim-wrapped = pkgs.writeScriptBin "nvim" ''
           #!${pkgs.bash}/bin/bash
           if [ "$EUID" -ne 0 ]; then
-            export PATH="${pkgs.lib.makeBinPath basePackages}:$PATH"
+            export PATH="${markdownModule.pkgs.efmLangServerWrapped}/bin:${pkgs.lib.makeBinPath basePackages}:$PATH"
             exec ${nvim-config}/bin/nvim "$@"
           else
+            export PATH="${markdownModule.pkgs.efmLangServerWrapped}/bin:$PATH"
             exec sudo -E ${nvim-config}/bin/nvim "$@"
           fi
         '';
