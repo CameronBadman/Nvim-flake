@@ -1,5 +1,5 @@
 {
-  description = "Neovim Flake with Markdown Support";
+  description = "Neovim Flake with Markdown and Terraform Support";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -35,6 +35,15 @@
           git
           ripgrep
           fd
+        ];
+        
+        # Terraform-specific packages
+        terraformPackages = with pkgs; [
+          terraform-ls
+          terraform
+          terraform-docs
+          tflint
+          tfsec
         ];
         
         # Merge our markdown dependencies with other packages
@@ -77,7 +86,7 @@
   fd
   git
   nodePackages.typescript-language-server
-] ++ markdownModule.dependencies; # Add Markdown-specific dependencies
+] ++ markdownModule.dependencies ++ terraformPackages; # Add Terraform-specific dependencies
         
         nvim-config = pkgs.neovim.override {
           configure = {
@@ -139,6 +148,9 @@
                 mkdnflow-nvim                # Markdown workflows
                 zk-nvim                      # Simple note-taking
                 
+                # Terraform specific plugins
+                vim-terraform               # Basic Terraform support
+                
                 # Spelling and grammar
                 vim-grammarous              # Grammar checking integrated
 
@@ -164,6 +176,7 @@
                   gomod
                   gowork
                   haskell
+                  hcl                      # For Terraform/HCL support
                 ]))
               ];
             };

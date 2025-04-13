@@ -1,131 +1,91 @@
+-- lua/plugins/lsp/servers/terraform.lua
 local M = {}
 
-local function setup_diagnostics()
-    local signs = {
-        Error = " ",
-        Warn = " ",
-        Hint = " ",
-        Info = " "
-    }
-    
-    for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-    end
-
-    vim.diagnostic.config({
-        virtual_text = {
-            prefix = '●',
-            severity_sort = true,
-        },
-        signs = true,
-        underline = true,
-        update_in_insert = true,
-        severity_sort = true,
-        float = {
-            border = 'rounded',
-            source = 'always',
-            header = '',
-            prefix = '',
-        },
-    })
-end
-
-local function setup_handlers()
-    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(
-        vim.lsp.handlers.hover, {
-            border = "rounded",
-        }
-    )
-
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
-        vim.lsp.handlers.signature_help, {
-            border = "rounded",
-        }
-    )
-end
-
-local function setup_terraform_highlights(bufnr)
-    local highlights = {
-        ['@lsp.type.variable.terraform'] = 'Variable',
-        ['@lsp.type.string.terraform'] = 'String',
-        ['@lsp.type.keyword.terraform'] = 'Keyword',
-        ['@lsp.type.number.terraform'] = 'Number',
-        ['@lsp.type.operator.terraform'] = 'Operator',
-        ['@lsp.type.parameter.terraform'] = 'Parameter',
-        ['@lsp.type.property.terraform'] = 'TSProperty',
-        ['@lsp.type.function.terraform'] = 'Function'
-    }
-
-    for group, link in pairs(highlights) do
-        vim.api.nvim_set_hl(0, group, { link = link })
-    end
-end
-
 function M.setup()
-    local lspconfig = require('lspconfig')
-    local util = require('lspconfig.util')
-    local keymaps = require('lua.plugins.lsp.keymaps')
-    local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
-    setup_diagnostics()
-    setup_handlers()
-
-    lspconfig.terraformls.setup({
-        capabilities = capabilities,
-        filetypes = { "terraform", "tf", "terraform-vars", "hcl" },
-        root_dir = util.root_pattern(
-            ".terraform",
-            "*.tf",
-            "*.tfvars",
-            ".git"
-        ),
-        settings = {
-            terraform = {
-                format = {
-                    enable = true,
-                    ignoreAttributeErrors = false
-                },
-                experimentalFeatures = {
-                    validateOnSave = true,
-                    prefillRequiredFields = true
-                }
-            }
-        },
-        on_attach = function(client, bufnr)
-            -- Setup buffer-local keymaps, highlighting, etc.
-            keymaps.set_keymaps(client, bufnr)
-            setup_terraform_highlights(bufnr)
-
-            -- Enable formatting on save
-            vim.api.nvim_create_autocmd("BufWritePre", {
-                buffer = bufnr,
-                callback = function()
-                    vim.lsp.buf.format({ async = false })
-                end
-            })
-
-            -- Enable inlay hints if available
-            if client.server_capabilities.inlayHintProvider then
-                vim.lsp.inlay_hint.enable(bufnr, true)
-            end
-
-            -- Setup document highlight (highlight references)
-            if client.server_capabilities.documentHighlightProvider then
-                vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-                vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-                    group = "lsp_document_highlight",
-                    buffer = bufnr,
-                    callback = vim.lsp.buf.document_highlight,
-                })
-                vim.api.nvim_create_autocmd("CursorMoved", {
-                    group = "lsp_document_highlight",
-                    buffer = bufnr,
-                    callback = vim.lsp.buf.clear_references,
-                })
-            end
+  local lspconfig = require('lspconfig')
+  
+  -- Simple terraform-ls setup WITHOUT LSP formatting
+  lspconfig.terraformls.setup({
+    filetypes = { "terraform", "tf", "terraform-vars", "hcl" },
+    root_dir = lspconfig.util.root_pattern(".terraform", "*.tf", "*.tfvars", ".git"),
+    settings = {
+      terraform = {
+        -- Disable LSP-based formatting
+        format = { enable = false },
+        experimentalFeatures = {
+          validateOnSave = true
+        }
+      }
+    }
+  })
+  
+  -- Set up terraform fmt on save
+  vim.api.nvim_create_augroup("TerraformFormatting", { clear = true })
+  
+  -- This runs after the file is saved
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    group = "TerraformFormatting",
+    pattern = {"*.tf", "*.tfvars"},
+    callback = function()
+      -- Get file path and cursor info
+      local file = vim.fn.expand('%:p')
+      local cursor_pos = vim.api.nvim_win_get_cursor(0)
+      local view = vim.fn.winsaveview()
+      
+      -- Run terraform fmt
+      vim.fn.jobstart('terraform fmt ' .. vim.fn.shellescape(file), {
+        on_exit = function(_, code)
+          if code == 0 then
+            -- Only reload if formatting succeeded
+            vim.schedule(function()
+              -- Reload the file content
+              vim.cmd('edit!')
+              
+              -- Restore cursor and view
+              vim.fn.winrestview(view)
+              pcall(function() vim.api.nvim_win_set_cursor(0, cursor_pos) end)
+              
+              vim.notify("Terraform file formatted", vim.log.levels.INFO)
+            end)
+          end
         end
-    })
+      })
+    end
+  })
+  
+  -- Also format before writing as a safeguard
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = "TerraformFormatting",
+    pattern = {"*.tf", "*.tfvars"},
+    callback = function()
+      -- We're using BufWritePost as the primary method, but also try
+      -- to format pre-write as a fallback
+      local file = vim.fn.expand('%:p')
+      vim.fn.system('terraform fmt ' .. vim.fn.shellescape(file))
+    end
+  })
+  
+  -- Basic filetype detection
+  vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+    pattern = {"*.tf", "*.tfvars"},
+    callback = function()
+      vim.bo.filetype = "terraform"
+    end
+  })
+  
+  vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+    pattern = {"*.hcl"},
+    callback = function()
+      vim.bo.filetype = "hcl"
+    end
+  })
+  
+  -- Add manual format command as a fallback
+  vim.api.nvim_create_user_command("TerraformFormat", function()
+    local file = vim.fn.expand('%')
+    vim.fn.system('terraform fmt ' .. vim.fn.shellescape(file))
+    vim.cmd('checktime')
+  end, {})
 end
 
 return M
