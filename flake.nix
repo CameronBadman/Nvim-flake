@@ -174,7 +174,7 @@
                 
                 # Elixir specific plugins
                 vim-elixir                  # Elixir syntax highlighting and indentation
-                vim-mix-format              # Mix format integration
+                # Note: mix format integration is handled by LSP formatting
                 
                 # Spelling and grammar
                 vim-grammarous              # Grammar checking integrated
