@@ -1,5 +1,5 @@
 {
-  description = "Neovim Flake with Markdown and Terraform Support";
+  description = "Neovim Flake with Markdown, Terraform, and Elixir Support";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -45,6 +45,27 @@
           tflint
           tfsec
         ];
+
+        # Elixir/Erlang packages
+        elixirPackages = with pkgs; [
+          # Core Elixir/Erlang runtime
+          erlang
+          elixir
+          elixir_ls           # Elixir Language Server
+          
+          # Phoenix framework
+          nodejs              # Needed for Phoenix assets
+          
+          # Additional Elixir tools
+          rebar3              # Erlang build tool
+          hex                 # Elixir package manager (usually comes with Elixir)
+          
+          # Database support (commonly used with Phoenix)
+          postgresql          # PostgreSQL client tools
+          
+          # Optional: Debugging and profiling tools
+          # observer_cli        # CLI version of Observer (if available)
+        ];
         
         # Merge our markdown dependencies with other packages
         extraPackages = with pkgs; [
@@ -86,7 +107,7 @@
   fd
   git
   nodePackages.typescript-language-server
-] ++ markdownModule.dependencies ++ terraformPackages; # Add Terraform-specific dependencies
+] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages; # Add Elixir dependencies
         
         nvim-config = pkgs.neovim.override {
           configure = {
@@ -151,6 +172,10 @@
                 # Terraform specific plugins
                 vim-terraform               # Basic Terraform support
                 
+                # Elixir specific plugins
+                vim-elixir                  # Elixir syntax highlighting and indentation
+                vim-mix-format              # Mix format integration
+                
                 # Spelling and grammar
                 vim-grammarous              # Grammar checking integrated
 
@@ -177,6 +202,11 @@
                   gowork
                   haskell
                   hcl                      # For Terraform/HCL support
+                  elixir                   # Elixir syntax highlighting
+                  erlang                   # Erlang syntax highlighting
+                  eex                      # Embedded Elixir templates
+                  heex                     # Phoenix HTML templates
+                  surface                  # Surface UI components (if using Surface)
                 ]))
               ];
             };
@@ -206,7 +236,18 @@
         };
         
         devShells.default = pkgs.mkShell {
-          packages = [ nvim-wrapped ] ++ basePackages;
+          packages = [ nvim-wrapped ] ++ basePackages ++ elixirPackages;
+          
+          # Set up Elixir environment variables
+          shellHook = ''
+            echo "Elixir development environment loaded!"
+            echo "Elixir version: $(elixir --version | head -1)"
+            echo "Erlang version: $(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell)"
+            
+            # Ensure mix is available
+            export MIX_ENV=dev
+            export ERL_AFLAGS="-kernel shell_history enabled"
+          '';
         };
       }
     );

@@ -1,13 +1,17 @@
--- lua/plugins/lsp/servers/terraform.lua
 local M = {}
 
 function M.setup()
   local lspconfig = require('lspconfig')
-  
-  -- Simple terraform-ls setup WITHOUT LSP formatting
+  local cmp_nvim_lsp = require('cmp_nvim_lsp')
+
+  -- Enhanced capabilities with nvim-cmp
+  local capabilities = cmp_nvim_lsp.default_capabilities()
+
+  -- Terraform-ls setup with enhanced completion
   lspconfig.terraformls.setup({
     filetypes = { "terraform", "tf", "terraform-vars", "hcl" },
     root_dir = lspconfig.util.root_pattern(".terraform", "*.tf", "*.tfvars", ".git"),
+    capabilities = capabilities,
     settings = {
       terraform = {
         -- Disable LSP-based formatting
@@ -16,35 +20,40 @@ function M.setup()
           validateOnSave = true
         }
       }
-    }
+    },
+    -- Optional: Add custom on_attach for additional keymappings or configurations
+    on_attach = function(client, bufnr)
+      -- Example of setting up keymaps when LSP attaches
+      local opts = { noremap = true, silent = true, buffer = bufnr }
+      
+      -- Common LSP keymaps
+      vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+      vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+      vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+      vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+      vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+    end
   })
-  
-  -- Set up terraform fmt on save
+
+  -- Existing formatting and filetype detection logic remains the same
   vim.api.nvim_create_augroup("TerraformFormatting", { clear = true })
-  
-  -- This runs after the file is saved
+
+  -- Post-save formatting
   vim.api.nvim_create_autocmd("BufWritePost", {
     group = "TerraformFormatting",
     pattern = {"*.tf", "*.tfvars"},
     callback = function()
-      -- Get file path and cursor info
       local file = vim.fn.expand('%:p')
       local cursor_pos = vim.api.nvim_win_get_cursor(0)
       local view = vim.fn.winsaveview()
-      
-      -- Run terraform fmt
+
       vim.fn.jobstart('terraform fmt ' .. vim.fn.shellescape(file), {
         on_exit = function(_, code)
           if code == 0 then
-            -- Only reload if formatting succeeded
             vim.schedule(function()
-              -- Reload the file content
               vim.cmd('edit!')
-              
-              -- Restore cursor and view
               vim.fn.winrestview(view)
               pcall(function() vim.api.nvim_win_set_cursor(0, cursor_pos) end)
-              
               vim.notify("Terraform file formatted", vim.log.levels.INFO)
             end)
           end
@@ -52,35 +61,33 @@ function M.setup()
       })
     end
   })
-  
-  -- Also format before writing as a safeguard
+
+  -- Pre-write formatting safeguard
   vim.api.nvim_create_autocmd("BufWritePre", {
     group = "TerraformFormatting",
     pattern = {"*.tf", "*.tfvars"},
     callback = function()
-      -- We're using BufWritePost as the primary method, but also try
-      -- to format pre-write as a fallback
       local file = vim.fn.expand('%:p')
       vim.fn.system('terraform fmt ' .. vim.fn.shellescape(file))
     end
   })
-  
-  -- Basic filetype detection
+
+  -- Filetype detection
   vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
     pattern = {"*.tf", "*.tfvars"},
     callback = function()
       vim.bo.filetype = "terraform"
     end
   })
-  
+
   vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
     pattern = {"*.hcl"},
     callback = function()
       vim.bo.filetype = "hcl"
     end
   })
-  
-  -- Add manual format command as a fallback
+
+  -- Manual format command
   vim.api.nvim_create_user_command("TerraformFormat", function()
     local file = vim.fn.expand('%')
     vim.fn.system('terraform fmt ' .. vim.fn.shellescape(file))
