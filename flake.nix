@@ -1,5 +1,5 @@
 {
-  description = "Neovim Flake with Markdown, Terraform, and Elixir Support";
+  description = "Neovim Flake with Markdown, Terraform, Elixir, and Gleam Support";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -40,7 +40,7 @@
         # Terraform-specific packages
         terraformPackages = with pkgs; [
           terraform-ls
-          terraform
+          terraform   
           terraform-docs
           tflint
           tfsec
@@ -66,6 +66,22 @@
           # Optional: Debugging and profiling tools
           # observer_cli        # CLI version of Observer (if available)
         ];
+
+        # Gleam packages
+        gleamPackages = with pkgs; [
+          # Core Gleam toolchain
+          gleam               # Gleam compiler and build tool (includes LSP)
+          erlang              # Gleam runs on the BEAM VM (already in elixirPackages but good to be explicit)
+          
+          # JavaScript runtime for Gleam's JS target
+          nodejs              # For running Gleam code compiled to JS
+          
+          # Additional tools for Gleam development
+          rebar3              # Erlang build tool (already in elixirPackages)
+          
+          # Note: Gleam LSP is built into the `gleam` command as `gleam lsp`
+          # Formatting is also built-in as `gleam format`
+        ];
         
         # Merge our markdown dependencies with other packages
         extraPackages = with pkgs; [
@@ -80,7 +96,7 @@
   nil                     # Nix LSP
   gopls                   # Go LSP
   terraform-ls
-  terraform
+  terraform   
   haskell-language-server # Haskell LSP
   hlint                   # Haskell linting
   ormolu                  # Haskell formatting
@@ -107,7 +123,7 @@
   fd
   git
   nodePackages.typescript-language-server
-] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages; # Add Elixir dependencies
+] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages ++ gleamPackages; # Add Gleam dependencies
         
         nvim-config = pkgs.neovim.override {
           configure = {
@@ -176,6 +192,9 @@
                 vim-elixir                  # Elixir syntax highlighting and indentation
                 # Note: mix format integration is handled by LSP formatting
                 
+                # Gleam specific plugins
+                # Note: There might not be dedicated Gleam plugins yet, but Treesitter handles syntax
+                
                 # Spelling and grammar
                 vim-grammarous              # Grammar checking integrated
 
@@ -203,10 +222,11 @@
                   haskell
                   hcl                      # For Terraform/HCL support
                   elixir                   # Elixir syntax highlighting
-                  erlang                   # Erlang syntax highlighting
+                  erlang                   # Erlang syntax highlighting (also used by Gleam)
                   eex                      # Embedded Elixir templates
                   heex                     # Phoenix HTML templates
                   surface                  # Surface UI components (if using Surface)
+                  gleam                    # Gleam syntax highlighting
                 ]))
               ];
             };
@@ -236,17 +256,24 @@
         };
         
         devShells.default = pkgs.mkShell {
-          packages = [ nvim-wrapped ] ++ basePackages ++ elixirPackages;
+          packages = [ nvim-wrapped ] ++ basePackages ++ elixirPackages ++ gleamPackages;
           
-          # Set up Elixir environment variables
+          # Set up development environment variables
           shellHook = ''
-            echo "Elixir development environment loaded!"
+            echo "Multi-language development environment loaded!"
             echo "Elixir version: $(elixir --version | head -1)"
             echo "Erlang version: $(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell)"
+            echo "Gleam version: $(gleam --version)"
             
-            # Ensure mix is available
+            # Ensure mix is available for Elixir
             export MIX_ENV=dev
             export ERL_AFLAGS="-kernel shell_history enabled"
+            
+            # Gleam environment setup
+            echo "Ready for Gleam development!"
+            echo "Use 'gleam new <project_name>' to create a new Gleam project"
+            echo "Use 'gleam run' to run Gleam projects"
+            echo "Use 'gleam test' to run tests"
           '';
         };
       }
