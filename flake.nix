@@ -1,5 +1,5 @@
 {
-  description = "Neovim Flake with Markdown, Terraform, Elixir, and Gleam Support";
+  description = "Neovim Flake with Markdown, Terraform, Elixir, Gleam, and Rust Support";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -82,6 +82,52 @@
           # Note: Gleam LSP is built into the `gleam` command as `gleam lsp`
           # Formatting is also built-in as `gleam format`
         ];
+
+        # Rust packages
+        rustPackages = with pkgs; [
+          # Core Rust toolchain
+          rustc               # Rust compiler
+          cargo               # Rust package manager and build system
+          rustfmt             # Rust code formatter
+          clippy              # Rust linter
+          rust-analyzer       # Rust Language Server
+          
+          # Development tools
+          cargo-watch         # Automatically run cargo commands on file changes
+          cargo-edit          # Add/remove dependencies from command line
+          cargo-outdated      # Check for outdated dependencies
+          cargo-audit         # Security vulnerability scanner
+          cargo-expand        # Show macro expansions
+          cargo-flamegraph    # Profiling tool
+          cargo-bloat         # Find what takes most space in executable
+          
+          # Cross-compilation and target management
+          cargo-cross         # Easy cross compilation
+          
+          # Testing and benchmarking
+          cargo-nextest       # Next-generation test harness
+          cargo-criterion     # Benchmarking (if available)
+          
+          # Documentation
+          mdbook              # Create books from markdown (used by Rust docs)
+          
+          # WASM support
+          wasm-pack           # Build Rust-generated WebAssembly
+          
+          # Additional useful tools
+          tokei               # Count lines of code
+          hyperfine           # Command-line benchmarking tool (Rust-based)
+          fd                  # Fast find alternative (already in basePackages)
+          ripgrep             # Fast grep alternative (already in basePackages)
+          bat                 # Cat with syntax highlighting
+          eza                 # Modern ls replacement (successor to exa)
+          dust                # du alternative
+          
+          # System libraries often needed for Rust development
+          pkg-config          # For linking system libraries
+          openssl             # Common dependency
+          sqlite              # Database
+        ];
         
         # Merge our markdown dependencies with other packages
         extraPackages = with pkgs; [
@@ -91,12 +137,9 @@
   python3Packages.python-lsp-ruff
   python3Packages.pylint
   nodePackages_latest.typescript-language-server
-  rust-analyzer
   sumneko-lua-language-server
   nil                     # Nix LSP
   gopls                   # Go LSP
-  terraform-ls
-  terraform   
   haskell-language-server # Haskell LSP
   hlint                   # Haskell linting
   ormolu                  # Haskell formatting
@@ -111,19 +154,15 @@
   gotests
   gofumpt                # Go formatting
   
-  # Formatters and linters
+  # Formatters and linters (Rust ones moved to rustPackages)
   black
   ruff
   nixpkgs-fmt
   stylua
-  rustfmt
   
   # Additional tools
-  ripgrep
-  fd
-  git
   nodePackages.typescript-language-server
-] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages ++ gleamPackages; # Add Gleam dependencies
+] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages ++ gleamPackages ++ rustPackages;
 
         # All development packages combined
         allDevPackages = basePackages ++ extraPackages;
@@ -198,6 +237,11 @@
                 # Gleam specific plugins
                 # Note: There might not be dedicated Gleam plugins yet, but Treesitter handles syntax
                 
+                # Rust specific plugins
+                rust-tools-nvim             # Enhanced Rust experience
+                crates-nvim                 # Cargo.toml dependency management
+                # Note: rust-analyzer integration is handled by LSP
+                
                 # Spelling and grammar
                 vim-grammarous              # Grammar checking integrated
 
@@ -208,13 +252,13 @@
                   python
                   javascript
                   typescript
-                  rust
+                  rust                     # Rust syntax highlighting
                   bash
                   markdown
                   markdown_inline
                   json
                   yaml
-                  toml
+                  toml                     # Important for Cargo.toml
                   git_rebase
                   gitcommit
                   gitignore
@@ -288,6 +332,12 @@
             paths = gleamPackages;
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
+          
+          rustPackages = pkgs.buildEnv {
+            name = "nvim-rust-packages";
+            paths = rustPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
         };
         
         devShells.default = pkgs.mkShell {
@@ -299,6 +349,8 @@
             echo "Elixir version: $(elixir --version | head -1)"
             echo "Erlang version: $(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell)"
             echo "Gleam version: $(gleam --version)"
+            echo "Rust version: $(rustc --version)"
+            echo "Cargo version: $(cargo --version)"
             
             # Ensure mix is available for Elixir
             export MIX_ENV=dev
@@ -309,6 +361,14 @@
             echo "Use 'gleam new <project_name>' to create a new Gleam project"
             echo "Use 'gleam run' to run Gleam projects"
             echo "Use 'gleam test' to run tests"
+            
+            # Rust environment setup
+            echo "Ready for Rust development!"
+            echo "Use 'cargo new <project_name>' to create a new Rust project"
+            echo "Use 'cargo build' to build projects"
+            echo "Use 'cargo test' to run tests"
+            echo "Use 'cargo run' to run projects"
+            echo "Use 'cargo watch -x check' for continuous compilation checking"
           '';
         };
       }
