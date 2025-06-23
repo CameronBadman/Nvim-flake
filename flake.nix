@@ -124,6 +124,9 @@
   git
   nodePackages.typescript-language-server
 ] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages ++ gleamPackages; # Add Gleam dependencies
+
+        # All development packages combined
+        allDevPackages = basePackages ++ extraPackages;
         
         nvim-config = pkgs.neovim.override {
           configure = {
@@ -234,7 +237,7 @@
           viAlias = true;
           vimAlias = true;
           withPython3 = true;
-          extraMakeWrapperArgs = ''--prefix PATH : "${pkgs.lib.makeBinPath (basePackages ++ extraPackages)}"'';
+          extraMakeWrapperArgs = ''--prefix PATH : "${pkgs.lib.makeBinPath allDevPackages}"'';
         };
 
         # Wrap nvim and add our custom efm-langserver to the path
@@ -253,10 +256,42 @@
           default = nvim-wrapped;
           nvim = nvim-wrapped;
           vim = nvim-wrapped;
+          
+          # Export the development packages as a buildEnv
+          devPackages = pkgs.buildEnv {
+            name = "nvim-dev-packages";
+            paths = allDevPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
+          # Export individual package groups if needed
+          basePackages = pkgs.buildEnv {
+            name = "nvim-base-packages";
+            paths = basePackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
+          terraformPackages = pkgs.buildEnv {
+            name = "nvim-terraform-packages";
+            paths = terraformPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
+          elixirPackages = pkgs.buildEnv {
+            name = "nvim-elixir-packages";
+            paths = elixirPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
+          gleamPackages = pkgs.buildEnv {
+            name = "nvim-gleam-packages";
+            paths = gleamPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
         };
         
         devShells.default = pkgs.mkShell {
-          packages = [ nvim-wrapped ] ++ basePackages ++ elixirPackages ++ gleamPackages;
+          packages = [ nvim-wrapped ] ++ allDevPackages;
           
           # Set up development environment variables
           shellHook = ''
