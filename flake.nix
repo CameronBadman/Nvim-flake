@@ -94,8 +94,8 @@
           
           # Essential build tools and compilers
           gcc                 # C compiler (needed for many Rust crates)
-          clang               # Alternative C compiler
-          llvm                # LLVM toolchain
+          # clang               # Alternative C compiler - REMOVED to avoid collision
+          # llvm                # LLVM toolchain - REMOVED to avoid collision
           pkg-config          # For linking system libraries
           cmake               # Build system (needed by many native dependencies)
           gnumake             # GNU Make
@@ -369,9 +369,38 @@
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
           
+          
           rustPackages = pkgs.buildEnv {
             name = "nvim-rust-packages";
             paths = rustPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
+          cppPackages = pkgs.buildEnv {
+            name = "nvim-cpp-packages";
+            paths = with pkgs; [
+              # C++ toolchain
+              clang                # Clang C++ compiler
+              clang-tools          # clang-format, clang-tidy, clangd LSP
+              llvm                 # LLVM toolchain
+              gdb                  # Debugger
+              valgrind             # Memory debugging
+              
+              # C++ build systems
+              cmake                # CMake build system
+              ninja                # Ninja build system
+              meson                # Meson build system
+              
+              # C++ libraries commonly used
+              boost                # Boost libraries
+              fmt                  # Modern formatting library
+              catch2               # Testing framework
+              
+              # Additional C++ tools
+              ccache               # Compiler cache
+              cppcheck             # Static analysis
+              include-what-you-use # Header optimization
+            ];
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
         };
@@ -388,6 +417,7 @@
             echo "Rust version: $(rustc --version)"
             echo "Cargo version: $(cargo --version)"
             echo "GCC version: $(gcc --version | head -1)"
+            echo "Clang version: $(clang --version | head -1)"
             
             # Ensure mix is available for Elixir
             export MIX_ENV=dev
@@ -402,13 +432,23 @@
             # Rust environment setup with enhanced support
             echo "Ready for Rust development with full system libraries!"
             echo "✅ Audio libraries: ALSA, PulseAudio, JACK, FFmpeg"
-            echo "✅ Build tools: GCC, Clang, CMake, pkg-config" 
+            echo "✅ Build tools: GCC, CMake, pkg-config" 
             echo "✅ System libraries: OpenSSL, SQLite, zlib"
             echo "Use 'cargo new <project_name>' to create a new Rust project"
             echo "Use 'cargo build' to build projects"
             echo "Use 'cargo test' to run tests"
             echo "Use 'cargo run' to run projects"
             echo "Use 'cargo watch -x check' for continuous compilation checking"
+            
+            # C++ environment setup
+            echo ""
+            echo "Ready for C++ development!"
+            echo "✅ Clang toolchain with clangd LSP"
+            echo "✅ Build systems: CMake, Ninja, Meson"
+            echo "✅ Libraries: Boost, fmt, catch2"
+            echo "✅ Tools: valgrind, gdb, cppcheck"
+            echo "Use 'clang++ -std=c++20' for modern C++"
+            echo "Use 'cmake -B build && cmake --build build' for CMake projects"
             
             # Set environment variables for native compilation
             export PKG_CONFIG_PATH="${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.sqlite.dev}/lib/pkgconfig:${pkgs.zlib.dev}/lib/pkgconfig:${pkgs.alsa-lib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH"
