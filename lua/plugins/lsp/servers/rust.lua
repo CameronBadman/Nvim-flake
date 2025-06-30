@@ -53,7 +53,9 @@ function M.setup()
                     },
                     enableExperimental = true,
                     disabled = { "unresolved-proc-macro" },
+                    -- Fixed: remapPrefix should be a map, not an array
                     remapPrefix = {},
+                    -- Fixed: these should be arrays if you want to specify warning codes
                     warningsAsHint = {},
                     warningsAsInfo = {},
                 },
