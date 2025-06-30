@@ -260,69 +260,56 @@ require('neo-tree').setup({
   end,
 })
 
--- Auto-refresh neo-tree when files change (helps with sudo issues)
-vim.api.nvim_create_autocmd({"BufWritePost", "FileChangedShellPost"}, {
+-- Helper function to safely refresh neo-tree
+local function safe_refresh_neotree(source_name)
+  -- First check if neo-tree is even loaded
+  local neotree_ok = pcall(require, "neo-tree")
+  if not neotree_ok then
+    return false
+  end
+  
+  -- Check if manager is available
+  local manager_ok, manager = pcall(require, "neo-tree.sources.manager")
+  if not manager_ok or not manager then
+    return false
+  end
+  
+  -- Check if the manager has the get_state function and if states are initialized
+  if not manager.get_state then
+    return false
+  end
+  
+  -- Try to get state, but catch any errors from state creation
+  local state_ok, state = pcall(manager.get_state, source_name)
+  if not state_ok or not state or not state.tree then
+    return false
+  end
+  
+  -- Finally, try to refresh
+  local refresh_ok = pcall(manager.refresh, source_name)
+  return refresh_ok
+end
+
+-- Auto-refresh neo-tree when files change (simplified version)
+vim.api.nvim_create_autocmd({"BufWritePost"}, {
   callback = function()
-    -- Safely refresh neo-tree if it's open and initialized
-    local ok, manager = pcall(require, "neo-tree.sources.manager")
-    if ok then
-      local filesystem_state = manager.get_state("filesystem")
-      if filesystem_state and filesystem_state.tree then
-        manager.refresh("filesystem")
-      end
-      local git_state = manager.get_state("git_status")
-      if git_state and git_state.tree then
-        manager.refresh("git_status")
+    -- Only refresh if neo-tree window is actually visible
+    for _, win in pairs(vim.api.nvim_list_wins()) do
+      local buf = vim.api.nvim_win_get_buf(win)
+      local buf_name = vim.api.nvim_buf_get_name(buf)
+      if string.match(buf_name, "neo%-tree") then
+        -- Neo-tree is visible, try to refresh after a delay
+        vim.defer_fn(function()
+          safe_refresh_neotree("filesystem")
+        end, 500)
+        break
       end
     end
   end,
 })
 
--- Periodic refresh for sudo scenarios (every 5 seconds when neo-tree is visible)
-local refresh_timer = nil
-vim.api.nvim_create_autocmd({"WinEnter", "BufEnter"}, {
-  pattern = "*",
-  callback = function()
-    local current_buf = vim.api.nvim_get_current_buf()
-    local buf_name = vim.api.nvim_buf_get_name(current_buf)
-    
-    -- Check if we're in neo-tree
-    if string.match(buf_name, "neo%-tree") then
-      -- Start periodic refresh
-      if refresh_timer then
-        refresh_timer:stop()
-      end
-      refresh_timer = vim.loop.new_timer()
-      refresh_timer:start(5000, 5000, vim.schedule_wrap(function()
-        local ok, manager = pcall(require, "neo-tree.sources.manager")
-        if ok then
-          local filesystem_state = manager.get_state("filesystem")
-          if filesystem_state and filesystem_state.tree then
-            manager.refresh("filesystem")
-          end
-        end
-      end))
-    else
-      -- Stop periodic refresh when leaving neo-tree
-      if refresh_timer then
-        refresh_timer:stop()
-        refresh_timer = nil
-      end
-    end
-  end,
-})
-
--- Force refresh when entering vim (helpful for sudo) - with delay to ensure neo-tree is loaded
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    vim.defer_fn(function()
-      local ok, manager = pcall(require, "neo-tree.sources.manager")
-      if ok then
-        local filesystem_state = manager.get_state("filesystem")
-        if filesystem_state and filesystem_state.tree then
-          manager.refresh("filesystem")
-        end
-      end
-    end, 2000) -- Increased delay to 2 seconds
-  end,
-})
+-- Simple refresh command you can run manually if needed
+vim.api.nvim_create_user_command('NeoTreeRefresh', function()
+  safe_refresh_neotree("filesystem")
+  safe_refresh_neotree("git_status")
+end, {})

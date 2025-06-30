@@ -155,8 +155,6 @@ CheckOptions:
         }
     })
     
-    -- Debug print to check if clangd setup is being called
-    print("clangd LSP setup completed")
 end
 
 return M

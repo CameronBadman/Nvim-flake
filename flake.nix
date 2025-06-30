@@ -83,7 +83,7 @@
           # Formatting is also built-in as `gleam format`
         ];
 
-        # Rust packages
+        # Rust packages with enhanced system dependencies
         rustPackages = with pkgs; [
           # Core Rust toolchain
           rustc               # Rust compiler
@@ -91,6 +91,32 @@
           rustfmt             # Rust code formatter
           clippy              # Rust linter
           rust-analyzer       # Rust Language Server
+          
+          # Essential build tools and compilers
+          gcc                 # C compiler (needed for many Rust crates)
+          clang               # Alternative C compiler
+          llvm                # LLVM toolchain
+          pkg-config          # For linking system libraries
+          cmake               # Build system (needed by many native dependencies)
+          gnumake             # GNU Make
+          
+          # System libraries commonly needed by Rust projects
+          openssl             # TLS/SSL library (very common dependency)
+          openssl.dev         # OpenSSL development headers
+          sqlite              # Embedded database
+          sqlite.dev          # SQLite development headers
+          zlib                # Compression library
+          zlib.dev            # Zlib development headers
+          
+          # Additional system libraries
+          libusb1             # USB device access
+          udev                # Device management
+          fontconfig          # Font configuration
+          freetype            # Font rendering
+          expat               # XML parsing
+          libxml2             # XML processing
+          curl                # HTTP client library
+          curl.dev            # cURL development headers
           
           # Development tools
           cargo-watch         # Automatically run cargo commands on file changes
@@ -100,6 +126,8 @@
           cargo-expand        # Show macro expansions
           cargo-flamegraph    # Profiling tool
           cargo-bloat         # Find what takes most space in executable
+          cargo-deny          # Dependency checker
+          cargo-spellcheck    # Spell checking for documentation
           
           # Cross-compilation and target management
           cargo-cross         # Easy cross compilation
@@ -113,6 +141,11 @@
           
           # WASM support
           wasm-pack           # Build Rust-generated WebAssembly
+          wasmtime            # WebAssembly runtime
+          
+          # Database tools
+          diesel-cli          # Diesel ORM CLI
+          sqlx-cli            # SQLx CLI tools
           
           # Additional useful tools
           tokei               # Count lines of code
@@ -122,11 +155,14 @@
           bat                 # Cat with syntax highlighting
           eza                 # Modern ls replacement (successor to exa)
           dust                # du alternative
+          bottom              # System monitor (btm)
+          bandwhich           # Network utilization by process
+          procs               # Modern ps replacement
           
-          # System libraries often needed for Rust development
-          pkg-config          # For linking system libraries
-          openssl             # Common dependency
-          sqlite              # Database
+          # Security and analysis tools
+          cargo-geiger        # Detect unsafe code usage
+          cargo-machete       # Remove unused dependencies
+          cargo-udeps         # Find unused dependencies
         ];
         
         # Merge our markdown dependencies with other packages
@@ -351,6 +387,7 @@
             echo "Gleam version: $(gleam --version)"
             echo "Rust version: $(rustc --version)"
             echo "Cargo version: $(cargo --version)"
+            echo "GCC version: $(gcc --version | head -1)"
             
             # Ensure mix is available for Elixir
             export MIX_ENV=dev
@@ -362,13 +399,22 @@
             echo "Use 'gleam run' to run Gleam projects"
             echo "Use 'gleam test' to run tests"
             
-            # Rust environment setup
-            echo "Ready for Rust development!"
+            # Rust environment setup with enhanced support
+            echo "Ready for Rust development with full system libraries!"
+            echo "✅ Audio libraries: ALSA, PulseAudio, JACK, FFmpeg"
+            echo "✅ Build tools: GCC, Clang, CMake, pkg-config" 
+            echo "✅ System libraries: OpenSSL, SQLite, zlib"
             echo "Use 'cargo new <project_name>' to create a new Rust project"
             echo "Use 'cargo build' to build projects"
             echo "Use 'cargo test' to run tests"
             echo "Use 'cargo run' to run projects"
             echo "Use 'cargo watch -x check' for continuous compilation checking"
+            
+            # Set environment variables for native compilation
+            export PKG_CONFIG_PATH="${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.sqlite.dev}/lib/pkgconfig:${pkgs.zlib.dev}/lib/pkgconfig:${pkgs.alsa-lib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH"
+            export OPENSSL_DIR="${pkgs.openssl.dev}"
+            export OPENSSL_LIB_DIR="${pkgs.openssl.out}/lib"
+            export OPENSSL_INCLUDE_DIR="${pkgs.openssl.dev}/include"
           '';
         };
       }
