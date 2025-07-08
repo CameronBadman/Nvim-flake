@@ -141,42 +141,16 @@
           # Formatting is also built-in as `gleam format`
         ];
 
-        # Rust packages with enhanced system dependencies
-        rustDevPackages = with pkgs; [
-          # Core Rust toolchain
+        # Rust packages - PLATFORM AWARE
+        rustCorePackages = with pkgs; [
+          # Core Rust toolchain (works on all platforms)
           rustc               # Rust compiler
           cargo               # Rust package manager and build system
           rustfmt             # Rust code formatter
           clippy              # Rust linter
           rust-analyzer       # Rust Language Server
           
-          # Essential build tools and compilers
-          gcc                 # C compiler (needed for many Rust crates)
-          # clang               # Alternative C compiler - REMOVED to avoid collision
-          # llvm                # LLVM toolchain - REMOVED to avoid collision
-          pkg-config          # For linking system libraries
-          cmake               # Build system (needed by many native dependencies)
-          gnumake             # GNU Make
-          
-          # System libraries commonly needed by Rust projects
-          openssl             # TLS/SSL library (very common dependency)
-          openssl.dev         # OpenSSL development headers
-          sqlite              # Embedded database
-          sqlite.dev          # SQLite development headers
-          zlib                # Compression library
-          zlib.dev            # Zlib development headers
-          
-          # Additional system libraries
-          libusb1             # USB device access
-          udev                # Device management
-          fontconfig          # Font configuration
-          freetype            # Font rendering
-          expat               # XML parsing
-          libxml2             # XML processing
-          curl                # HTTP client library
-          curl.dev            # cURL development headers
-          
-          # Development tools
+          # Development tools (platform independent)
           cargo-watch         # Automatically run cargo commands on file changes
           cargo-edit          # Add/remove dependencies from command line
           cargo-outdated      # Check for outdated dependencies
@@ -186,11 +160,7 @@
           cargo-bloat         # Find what takes most space in executable
           cargo-deny          # Dependency checker
           cargo-spellcheck    # Spell checking for documentation
-          
-          # Cross-compilation and target management
           cargo-cross         # Easy cross compilation
-          
-          # Testing and benchmarking
           cargo-nextest       # Next-generation test harness
           cargo-criterion     # Benchmarking (if available)
           
@@ -205,16 +175,13 @@
           diesel-cli          # Diesel ORM CLI
           sqlx-cli            # SQLx CLI tools
           
-          # Additional useful tools
+          # Cross-platform useful tools
           tokei               # Count lines of code
           hyperfine           # Command-line benchmarking tool (Rust-based)
-          fd                  # Fast find alternative (already in basePackages)
-          ripgrep             # Fast grep alternative (already in basePackages)
           bat                 # Cat with syntax highlighting
           eza                 # Modern ls replacement (successor to exa)
           dust                # du alternative
           bottom              # System monitor (btm)
-          bandwhich           # Network utilization by process
           procs               # Modern ps replacement
           
           # Security and analysis tools
@@ -222,8 +189,55 @@
           cargo-machete       # Remove unused dependencies
           cargo-udeps         # Find unused dependencies
         ];
+
+        # Platform-specific build tools and libraries
+        rustLinuxPackages = with pkgs; lib.optionals stdenv.isLinux [
+          # Linux-specific system libraries
+          udev                # Linux device management
+          libusb1             # USB device access (primarily Linux)
+          
+          # Build tools that work differently on Linux
+          gcc                 # C compiler (on Linux, actual GCC)
+        ];
+
+        rustDarwinPackages = with pkgs; lib.optionals stdenv.isDarwin [
+          # macOS-compatible build tools
+          # Note: gcc on macOS usually maps to clang, which is fine
+        ];
+
+        # Cross-platform build essentials and libraries
+        rustBuildPackages = with pkgs; [
+          # Build system tools (work on both platforms)
+          pkg-config          # For linking system libraries
+          cmake               # Build system (needed by many native dependencies)
+          gnumake             # GNU Make
+          
+          # System libraries (available on both platforms)
+          openssl             # TLS/SSL library (very common dependency)
+          openssl.dev         # OpenSSL development headers
+          sqlite              # Embedded database
+          sqlite.dev          # SQLite development headers
+          zlib                # Compression library
+          zlib.dev            # Zlib development headers
+          
+          # Cross-platform libraries
+          fontconfig          # Font configuration (available on macOS via nixpkgs)
+          freetype            # Font rendering
+          expat               # XML parsing
+          libxml2             # XML processing
+          curl                # HTTP client library
+          curl.dev            # cURL development headers
+        ];
+
+        # Some tools that might cause issues - platform conditional
+        rustNetworkPackages = with pkgs; lib.optionals stdenv.isLinux [
+          bandwhich           # Network utilization by process (might be Linux-specific)
+        ];
+
+        # Combined Rust packages
+        rustDevPackages = rustCorePackages ++ rustLinuxPackages ++ rustDarwinPackages ++ rustBuildPackages ++ rustNetworkPackages;
         
-        # Merge our markdown dependencies with other packages (EXACT COPY FROM WORKING VERSION)
+        # Merge our markdown dependencies with other packages
         extraPackages = pythonDevPackages ++ jsDevPackages ++ goDevPackages ++ luaDevPackages ++ nixDevPackages ++ haskellDevPackages ++ cppDevPackages ++ markdownModule.dependencies ++ terraformDevPackages ++ elixirDevPackages ++ gleamDevPackages ++ rustDevPackages;
 
         # All development packages combined
