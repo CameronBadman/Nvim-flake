@@ -37,8 +37,66 @@
           fd
         ];
         
+        # Python packages
+        pythonDevPackages = with pkgs; [
+          python3Packages.python-lsp-server
+          python3Packages.python-lsp-black
+          python3Packages.python-lsp-ruff
+          python3Packages.pylint
+          black
+          ruff
+        ];
+
+        # JavaScript/TypeScript packages  
+        jsDevPackages = with pkgs; [
+          nodePackages_latest.typescript-language-server
+          nodePackages.typescript-language-server
+        ];
+
+        # Go packages
+        goDevPackages = with pkgs; [
+          go
+          gopls
+          golangci-lint
+          delve
+          gore
+          gotools
+          gotests
+          gofumpt
+        ];
+
+        # Lua packages
+        luaDevPackages = with pkgs; [
+          sumneko-lua-language-server
+          stylua
+        ];
+
+        # Nix packages
+        nixDevPackages = with pkgs; [
+          nil
+          nixpkgs-fmt
+        ];
+
+        # Haskell packages
+        haskellDevPackages = with pkgs; [
+          haskell-language-server
+          hlint
+          ormolu
+          ghc
+          cabal-install
+          stack
+          pandoc
+          haskellPackages.hakyll
+          haskellPackages.parsec
+        ];
+
+        # C++ packages
+        cppDevPackages = with pkgs; [
+          clang-tools
+        ];
+
         # Terraform-specific packages
-        terraformPackages = with pkgs; [
+        terraformDevPackages = with pkgs; [
           terraform-ls
           terraform   
           terraform-docs
@@ -47,7 +105,7 @@
         ];
 
         # Elixir/Erlang packages
-        elixirPackages = with pkgs; [
+        elixirDevPackages = with pkgs; [
           # Core Elixir/Erlang runtime
           erlang
           elixir
@@ -68,7 +126,7 @@
         ];
 
         # Gleam packages
-        gleamPackages = with pkgs; [
+        gleamDevPackages = with pkgs; [
           # Core Gleam toolchain
           gleam               # Gleam compiler and build tool (includes LSP)
           erlang              # Gleam runs on the BEAM VM (already in elixirPackages but good to be explicit)
@@ -84,7 +142,7 @@
         ];
 
         # Rust packages with enhanced system dependencies
-        rustPackages = with pkgs; [
+        rustDevPackages = with pkgs; [
           # Core Rust toolchain
           rustc               # Rust compiler
           cargo               # Rust package manager and build system
@@ -165,40 +223,8 @@
           cargo-udeps         # Find unused dependencies
         ];
         
-        # Merge our markdown dependencies with other packages
-        extraPackages = with pkgs; [
-  # LSP servers
-  python3Packages.python-lsp-server
-  python3Packages.python-lsp-black
-  python3Packages.python-lsp-ruff
-  python3Packages.pylint
-  nodePackages_latest.typescript-language-server
-  sumneko-lua-language-server
-  nil                     # Nix LSP
-  gopls                   # Go LSP
-  haskell-language-server # Haskell LSP
-  hlint                   # Haskell linting
-  ormolu                  # Haskell formatting
-  clang-tools
-  
-  # Go tools
-  go
-  golangci-lint
-  delve
-  gore
-  gotools
-  gotests
-  gofumpt                # Go formatting
-  
-  # Formatters and linters (Rust ones moved to rustPackages)
-  black
-  ruff
-  nixpkgs-fmt
-  stylua
-  
-  # Additional tools
-  nodePackages.typescript-language-server
-] ++ markdownModule.dependencies ++ terraformPackages ++ elixirPackages ++ gleamPackages ++ rustPackages;
+        # Merge our markdown dependencies with other packages (EXACT COPY FROM WORKING VERSION)
+        extraPackages = pythonDevPackages ++ jsDevPackages ++ goDevPackages ++ luaDevPackages ++ nixDevPackages ++ haskellDevPackages ++ cppDevPackages ++ markdownModule.dependencies ++ terraformDevPackages ++ elixirDevPackages ++ gleamDevPackages ++ rustDevPackages;
 
         # All development packages combined
         allDevPackages = basePackages ++ extraPackages;
@@ -337,45 +363,55 @@
           nvim = nvim-wrapped;
           vim = nvim-wrapped;
           
-          # Export the development packages as a buildEnv
-          devPackages = pkgs.buildEnv {
-            name = "nvim-dev-packages";
-            paths = allDevPackages;
+          # Export individual package groups
+          pythonPackages = pkgs.buildEnv {
+            name = "nvim-python-packages";
+            paths = pythonDevPackages;
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
-          
-          # Export individual package groups if needed
-          basePackages = pkgs.buildEnv {
-            name = "nvim-base-packages";
-            paths = basePackages;
+
+          jsPackages = pkgs.buildEnv {
+            name = "nvim-js-packages";
+            paths = jsDevPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+
+          goPackages = pkgs.buildEnv {
+            name = "nvim-go-packages";
+            paths = goDevPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+
+          haskellPackages = pkgs.buildEnv {
+            name = "nvim-haskell-packages";
+            paths = haskellDevPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+
+          rustPackages = pkgs.buildEnv {
+            name = "nvim-rust-packages";
+            paths = rustDevPackages;
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
           
           terraformPackages = pkgs.buildEnv {
             name = "nvim-terraform-packages";
-            paths = terraformPackages;
+            paths = terraformDevPackages;
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
           
           elixirPackages = pkgs.buildEnv {
             name = "nvim-elixir-packages";
-            paths = elixirPackages;
+            paths = elixirDevPackages;
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
           
           gleamPackages = pkgs.buildEnv {
             name = "nvim-gleam-packages";
-            paths = gleamPackages;
+            paths = gleamDevPackages;
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
-          
-          
-          rustPackages = pkgs.buildEnv {
-            name = "nvim-rust-packages";
-            paths = rustPackages;
-            pathsToLink = [ "/bin" "/share" "/lib" ];
-          };
-          
+
           cppPackages = pkgs.buildEnv {
             name = "nvim-cpp-packages";
             paths = with pkgs; [
@@ -403,6 +439,20 @@
             ];
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
+          
+          # Export the development packages as a buildEnv
+          devPackages = pkgs.buildEnv {
+            name = "nvim-dev-packages";
+            paths = allDevPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
+          # Export base packages
+          basePackages = pkgs.buildEnv {
+            name = "nvim-base-packages";
+            paths = basePackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
         };
         
         devShells.default = pkgs.mkShell {
@@ -411,47 +461,13 @@
           # Set up development environment variables
           shellHook = ''
             echo "Multi-language development environment loaded!"
-            echo "Elixir version: $(elixir --version | head -1)"
-            echo "Erlang version: $(erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell)"
-            echo "Gleam version: $(gleam --version)"
-            echo "Rust version: $(rustc --version)"
-            echo "Cargo version: $(cargo --version)"
-            echo "GCC version: $(gcc --version | head -1)"
-            echo "Clang version: $(clang --version | head -1)"
             
             # Ensure mix is available for Elixir
             export MIX_ENV=dev
             export ERL_AFLAGS="-kernel shell_history enabled"
             
-            # Gleam environment setup
-            echo "Ready for Gleam development!"
-            echo "Use 'gleam new <project_name>' to create a new Gleam project"
-            echo "Use 'gleam run' to run Gleam projects"
-            echo "Use 'gleam test' to run tests"
-            
-            # Rust environment setup with enhanced support
-            echo "Ready for Rust development with full system libraries!"
-            echo "✅ Audio libraries: ALSA, PulseAudio, JACK, FFmpeg"
-            echo "✅ Build tools: GCC, CMake, pkg-config" 
-            echo "✅ System libraries: OpenSSL, SQLite, zlib"
-            echo "Use 'cargo new <project_name>' to create a new Rust project"
-            echo "Use 'cargo build' to build projects"
-            echo "Use 'cargo test' to run tests"
-            echo "Use 'cargo run' to run projects"
-            echo "Use 'cargo watch -x check' for continuous compilation checking"
-            
-            # C++ environment setup
-            echo ""
-            echo "Ready for C++ development!"
-            echo "✅ Clang toolchain with clangd LSP"
-            echo "✅ Build systems: CMake, Ninja, Meson"
-            echo "✅ Libraries: Boost, fmt, catch2"
-            echo "✅ Tools: valgrind, gdb, cppcheck"
-            echo "Use 'clang++ -std=c++20' for modern C++"
-            echo "Use 'cmake -B build && cmake --build build' for CMake projects"
-            
             # Set environment variables for native compilation
-            export PKG_CONFIG_PATH="${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.sqlite.dev}/lib/pkgconfig:${pkgs.zlib.dev}/lib/pkgconfig:${pkgs.alsa-lib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH"
+            export PKG_CONFIG_PATH="${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.sqlite.dev}/lib/pkgconfig:${pkgs.zlib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH"
             export OPENSSL_DIR="${pkgs.openssl.dev}"
             export OPENSSL_LIB_DIR="${pkgs.openssl.out}/lib"
             export OPENSSL_INCLUDE_DIR="${pkgs.openssl.dev}/include"
