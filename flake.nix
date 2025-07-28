@@ -65,6 +65,35 @@
           gofumpt
         ];
 
+
+                csharpDevPackages = with pkgs; [
+          # Core .NET
+          dotnet-sdk         # Latest .NET SDK
+          dotnet-runtime     # .NET runtime
+          
+          # Language server
+          omnisharp-roslyn   # C# LSP server
+          
+          # Debugger
+          netcoredbg        # .NET debugger
+        ];
+
+# Minimal safe Java packages (guaranteed to exist in nixpkgs)
+        javaDevPackages = with pkgs; [
+          # JDK (includes jdb debugger, javac, java, etc.)
+          jdk21             # Java 21 LTS with all tools
+          
+          # Language server
+          jdt-language-server   # Eclipse JDT Language Server
+          
+          # Build tools
+          maven             # Apache Maven
+          gradle            # Gradle build system
+          
+          # Code analysis
+          checkstyle        # Java code style checker
+        ];
+
         # Lua packages
         luaDevPackages = with pkgs; [
           sumneko-lua-language-server
@@ -238,7 +267,7 @@
         rustDevPackages = rustCorePackages ++ rustLinuxPackages ++ rustDarwinPackages ++ rustBuildPackages ++ rustNetworkPackages;
         
         # Merge our markdown dependencies with other packages
-        extraPackages = pythonDevPackages ++ jsDevPackages ++ goDevPackages ++ luaDevPackages ++ nixDevPackages ++ haskellDevPackages ++ cppDevPackages ++ markdownModule.dependencies ++ terraformDevPackages ++ elixirDevPackages ++ gleamDevPackages ++ rustDevPackages;
+        extraPackages = pythonDevPackages ++ javaDevPackages ++ csharpDevPackages  ++ jsDevPackages ++ goDevPackages ++ luaDevPackages ++ nixDevPackages ++ haskellDevPackages ++ cppDevPackages ++ markdownModule.dependencies ++ terraformDevPackages ++ elixirDevPackages ++ gleamDevPackages ++ rustDevPackages;
 
         # All development packages combined
         allDevPackages = basePackages ++ extraPackages;
