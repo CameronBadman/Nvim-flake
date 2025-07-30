@@ -83,7 +83,7 @@ public class TestLSP {
         // Test filtering and collecting
         List<Person> adults = people.stream()
             .filter(p -> p.getAge() >= 21)
-            .sorted(Comparator.comparing(Person::getName))
+            .sorted(Comparator(Person::getName))
             .collect(Collectors.toList());
             
         System.out.println("Adults: " + adults.size());
