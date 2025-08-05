@@ -1,5 +1,5 @@
 {
-  description = "Neovim Flake with Markdown, Terraform, Elixir, Gleam";
+  description = "Neovim Flake with Markdown, Terraform, Elixir, Gleam, and Rust Support";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
@@ -171,8 +171,104 @@
           # Formatting is also built-in as `gleam format`
         ];
 
+        # Rust packages - PLATFORM AWARE
+        rustCorePackages = with pkgs; [
+          # Core Rust toolchain (works on all platforms)
+          rustc               # Rust compiler
+          cargo               # Rust package manager and build system
+          rustfmt             # Rust code formatter
+          clippy              # Rust linter
+          rust-analyzer       # Rust Language Server
+          
+          # Development tools (platform independent)
+          cargo-watch         # Automatically run cargo commands on file changes
+          cargo-edit          # Add/remove dependencies from command line
+          cargo-outdated      # Check for outdated dependencies
+          cargo-audit         # Security vulnerability scanner
+          cargo-expand        # Show macro expansions
+          cargo-flamegraph    # Profiling tool
+          cargo-bloat         # Find what takes most space in executable
+          cargo-deny          # Dependency checker
+          cargo-spellcheck    # Spell checking for documentation
+          cargo-cross         # Easy cross compilation
+          cargo-nextest       # Next-generation test harness
+          cargo-criterion     # Benchmarking (if available)
+          
+          # Documentation
+          mdbook              # Create books from markdown (used by Rust docs)
+          
+          # WASM support
+          wasm-pack           # Build Rust-generated WebAssembly
+          wasmtime            # WebAssembly runtime
+          
+          # Database tools
+          diesel-cli          # Diesel ORM CLI
+          sqlx-cli            # SQLx CLI tools
+          
+          # Cross-platform useful tools
+          tokei               # Count lines of code
+          hyperfine           # Command-line benchmarking tool (Rust-based)
+          bat                 # Cat with syntax highlighting
+          eza                 # Modern ls replacement (successor to exa)
+          dust                # du alternative
+          bottom              # System monitor (btm)
+          procs               # Modern ps replacement
+          
+          # Security and analysis tools
+          cargo-geiger        # Detect unsafe code usage
+          cargo-machete       # Remove unused dependencies
+          cargo-udeps         # Find unused dependencies
+        ];
+
+        # Platform-specific build tools and libraries
+        rustLinuxPackages = with pkgs; lib.optionals stdenv.isLinux [
+          # Linux-specific system libraries
+          udev                # Linux device management
+          libusb1             # USB device access (primarily Linux)
+          
+          # Build tools that work differently on Linux
+          gcc                 # C compiler (on Linux, actual GCC)
+        ];
+
+        rustDarwinPackages = with pkgs; lib.optionals stdenv.isDarwin [
+          # macOS-compatible build tools
+          # Note: gcc on macOS usually maps to clang, which is fine
+        ];
+
+        # Cross-platform build essentials and libraries
+        rustBuildPackages = with pkgs; [
+          # Build system tools (work on both platforms)
+          pkg-config          # For linking system libraries
+          cmake               # Build system (needed by many native dependencies)
+          gnumake             # GNU Make
+          
+          # System libraries (available on both platforms)
+          openssl             # TLS/SSL library (very common dependency)
+          openssl.dev         # OpenSSL development headers
+          sqlite              # Embedded database
+          sqlite.dev          # SQLite development headers
+          zlib                # Compression library
+          zlib.dev            # Zlib development headers
+          
+          # Cross-platform libraries
+          fontconfig          # Font configuration (available on macOS via nixpkgs)
+          freetype            # Font rendering
+          expat               # XML parsing
+          libxml2             # XML processing
+          curl                # HTTP client library
+          curl.dev            # cURL development headers
+        ];
+
+        # Some tools that might cause issues - platform conditional
+        rustNetworkPackages = with pkgs; lib.optionals stdenv.isLinux [
+          bandwhich           # Network utilization by process (might be Linux-specific)
+        ];
+
+        # Combined Rust packages
+        rustDevPackages = rustCorePackages ++ rustLinuxPackages ++ rustDarwinPackages ++ rustBuildPackages ++ rustNetworkPackages;
+        
         # Merge our markdown dependencies with other packages
-        extraPackages = pythonDevPackages ++ javaDevPackages ++ csharpDevPackages  ++ jsDevPackages ++ goDevPackages ++ luaDevPackages ++ nixDevPackages ++ haskellDevPackages ++ cppDevPackages ++ markdownModule.dependencies ++ terraformDevPackages ++ elixirDevPackages ++ gleamDevPackages;
+        extraPackages = pythonDevPackages ++ javaDevPackages ++ csharpDevPackages  ++ jsDevPackages ++ goDevPackages ++ luaDevPackages ++ nixDevPackages ++ haskellDevPackages ++ cppDevPackages ++ markdownModule.dependencies ++ terraformDevPackages ++ elixirDevPackages ++ gleamDevPackages ++ rustDevPackages;
 
         # All development packages combined
         allDevPackages = basePackages ++ extraPackages;
@@ -248,6 +344,11 @@
                 # Gleam specific plugins
                 # Note: There might not be dedicated Gleam plugins yet, but Treesitter handles syntax
                 
+                # Rust specific plugins
+                rust-tools-nvim             # Enhanced Rust experience
+                crates-nvim                 # Cargo.toml dependency management
+                # Note: rust-analyzer integration is handled by LSP
+                
                 # Spelling and grammar
                 vim-grammarous              # Grammar checking integrated
 
@@ -258,6 +359,7 @@
                   python
                   javascript
                   typescript
+                  rust                     # Rust syntax highlighting
                   bash
                   markdown
                   markdown_inline
@@ -331,6 +433,12 @@
             pathsToLink = [ "/bin" "/share" "/lib" ];
           };
 
+          rustPackages = pkgs.buildEnv {
+            name = "nvim-rust-packages";
+            paths = rustDevPackages;
+            pathsToLink = [ "/bin" "/share" "/lib" ];
+          };
+          
           terraformPackages = pkgs.buildEnv {
             name = "nvim-terraform-packages";
             paths = terraformDevPackages;
