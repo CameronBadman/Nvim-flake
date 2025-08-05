@@ -3,17 +3,16 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-
   };
   outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
        let
-        pkgs = import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        };
+  pkgs = import nixpkgs {
+    inherit system;
+    config = {
+      allowUnfree = true;
+    };
+  };
 
         # Import our markdown LSP module
         markdownModule = import ./modules/markdown-lsp.nix { inherit pkgs; lib = pkgs.lib; };
@@ -284,7 +283,6 @@
             packages.myPlugins = with pkgs.vimPlugins; {
               start = [
                 # Core plugins
-
                 telescope-nvim
                 plenary-nvim
                 neo-tree-nvim
