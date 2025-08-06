@@ -33,12 +33,13 @@
       flake = {
         nixvimModule = ./config;
         
-        # Export the language packages from languages.nix for other flakes to use
-        lib.getLanguagePackages = pkgs: 
-          let 
-            languagesModule = import ./languages.nix { inherit pkgs; };
-          in 
-            languagesModule.extraPackages;
+        lib = {
+          getLanguagePackages = pkgs: 
+            let 
+              languagesModule = import ./languages.nix { inherit pkgs; };
+            in 
+              languagesModule.extraPackages;
+        };
       };
     };
 }
