@@ -1,6 +1,5 @@
 {
   description = "Minimal NixVim configuration flake";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixvim = {
@@ -9,7 +8,6 @@
     };
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
-
   outputs = { nixpkgs, nixvim, flake-parts, ... }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
@@ -20,7 +18,7 @@
             inherit pkgs;
             module = [
               ./config
-              ./languages.nix 
+              ./languages.nix
             ];
           };
         };
@@ -34,6 +32,13 @@
       
       flake = {
         nixvimModule = ./config;
+        
+        # Export the language packages from languages.nix for other flakes to use
+        lib.getLanguagePackages = pkgs: 
+          let 
+            languagesModule = import ./languages.nix { inherit pkgs; };
+          in 
+            languagesModule.extraPackages;
       };
     };
 }
