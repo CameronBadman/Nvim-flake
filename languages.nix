@@ -4,7 +4,7 @@
   # Include language toolchains (compilers/runtimes) that LSPs need to function
   extraPackages = with pkgs; [
     # C/C++ Compilers & Build Tools (for clangd LSP)
-    gcc clang cmake gnumake pkg-config gdb lldb valgrind
+    gcc clang cmake gnumake pkg-config gdb lldb
     # Rust Toolchain (for rust_analyzer LSP)
     rustc cargo rustfmt clippy
     # Python Runtime (for pyright LSP)
