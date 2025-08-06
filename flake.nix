@@ -18,7 +18,10 @@
         packages = {
           default = nixvim.legacyPackages.${system}.makeNixvimWithModule {
             inherit pkgs;
-            module = ./config;
+            module = [
+              ./config
+              ./languages.nix 
+            ];
           };
         };
         

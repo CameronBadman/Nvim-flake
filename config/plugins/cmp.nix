@@ -1,109 +1,124 @@
-{ lib, ... }:
 {
   plugins.cmp = {
     enable = true;
     
     settings = {
+      # Sources configuration - no longer nested lists
+      sources = [
+        { name = "nvim_lsp"; }
+        { name = "luasnip"; }
+        { name = "buffer"; }
+        { name = "path"; }
+        { name = "cmdline"; }
+      ];
+
+      # Snippet configuration - full Lua function required
       snippet = {
         expand = "function(args) require('luasnip').lsp_expand(args.body) end";
       };
-      
-      completion = {
-        completeopt = "menu,menuone,noinsert";
-      };
-      
-      window = {
-        completion = {
-          border = "rounded";
-          winhighlight = "Normal:CmpPmenu,CursorLine:CmpSel,Search:None";
-        };
-        documentation = {
-          border = "rounded";
-        };
-      };
-      
-      mapping = {
-        "<C-b>" = "cmp.mapping.scroll_docs(-4)";
-        "<C-f>" = "cmp.mapping.scroll_docs(4)";
-        "<C-Space>" = "cmp.mapping.complete()";
-        "<C-e>" = "cmp.mapping.abort()";
-        "<CR>" = "cmp.mapping.confirm({ select = true })";
-        
-        # Better navigation with Tab/Shift-Tab AND arrow keys
-        "<Tab>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_next_item() else fallback() end end, { 'i', 's' })";
-        "<S-Tab>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_prev_item() else fallback() end end, { 'i', 's' })";
-        "<Down>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_next_item() else fallback() end end, { 'i', 's' })";
-        "<Up>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_prev_item() else fallback() end end, { 'i', 's' })";
-        
-        # Ctrl navigation as well
-        "<C-n>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_next_item() else fallback() end end, { 'i', 's' })";
-        "<C-p>" = "cmp.mapping(function(fallback) if cmp.visible() then cmp.select_prev_item() else fallback() end end, { 'i', 's' })";
-      };
-      
-      sources = lib.mkDefault [
-        { name = "nvim_lsp"; priority = 1000; }
-        { name = "luasnip"; priority = 750; }
-        { name = "buffer"; priority = 500; }
-        { name = "path"; priority = 250; }
-      ];
-      
+
+      # Formatting configuration - moved to settings.formatting
       formatting = {
         format = ''
           function(entry, vim_item)
-            local icons = {
-              Text = "󰉿",
+            local kind_icons = {
+              Text = "",
               Method = "󰆧",
               Function = "󰊕",
               Constructor = "",
-              Field = "󰜢",
-              Variable = "󰀫",
+              Field = "󰇽",
+              Variable = "󰂡",
               Class = "󰠱",
               Interface = "",
               Module = "",
               Property = "󰜢",
-              Unit = "󰑭",
+              Unit = "",
               Value = "󰎠",
               Enum = "",
               Keyword = "󰌋",
               Snippet = "",
               Color = "󰏘",
               File = "󰈙",
-              Reference = "󰈇",
+              Reference = "",
               Folder = "󰉋",
               EnumMember = "",
               Constant = "󰏿",
-              Struct = "󰙅",
+              Struct = "",
               Event = "",
               Operator = "󰆕",
-              TypeParameter = "",
+              TypeParameter = "󰅲",
             }
             
-            local source_names = {
+            vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
+            vim_item.menu = ({
               nvim_lsp = "[LSP]",
               luasnip = "[Snippet]",
               buffer = "[Buffer]",
               path = "[Path]",
-            }
-            
-            -- Kind icon
-            vim_item.kind = string.format('%s %s', icons[vim_item.kind] or "", vim_item.kind)
-            
-            -- Source name
-            vim_item.menu = source_names[entry.source.name] or "[" .. entry.source.name .. "]"
+            })[entry.source.name]
             
             return vim_item
           end
         '';
       };
+
+      # Mapping configuration - moved to settings.mapping
+      mapping = {
+        "<C-b>" = "cmp.mapping.scroll_docs(-4)";
+        "<C-f>" = "cmp.mapping.scroll_docs(4)";
+        "<C-Space>" = "cmp.mapping.complete()";
+        "<C-e>" = "cmp.mapping.abort()";
+        "<CR>" = "cmp.mapping.confirm({ select = true })";
+        "<Tab>" = ''
+          cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif require("luasnip").expand_or_jumpable() then
+              require("luasnip").expand_or_jump()
+            else
+              fallback()
+            end
+          end, { "i", "s" })
+        '';
+        "<S-Tab>" = ''
+          cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_previous_item()
+            elseif require("luasnip").jumpable(-1) then
+              require("luasnip").jump(-1)
+            else
+              fallback()
+            end
+          end, { "i", "s" })
+        '';
+      };
+
+      # Window configuration - moved to settings.window
+      window = {
+        completion = {
+          border = "rounded";
+          winhighlight = "Normal:CmpPmenu,CursorLine:PmenuSel,Search:None";
+        };
+        documentation = {
+          border = "rounded";
+        };
+      };
+
+      # Experimental features
+      experimental = {
+        ghost_text = true;
+      };
     };
   };
 
-  # Essential completion sources that external flakes can extend
+  # If you need luasnip
   plugins.luasnip = {
     enable = true;
-    settings = {
-      enable_autosnippets = true;
-      store_selection_keys = "<Tab>";
-    };
   };
+
+  # If you need additional cmp sources
+  plugins.cmp-nvim-lsp.enable = true;
+  plugins.cmp-buffer.enable = true;
+  plugins.cmp-path.enable = true;
+  plugins.cmp_luasnip.enable = true;
 }
