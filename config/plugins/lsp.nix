@@ -61,6 +61,95 @@
           };
         };
 
+        # JavaScript/TypeScript
+        ts_ls = {
+          enable = true;
+          settings = {
+            typescript = {
+              inlayHints = {
+                includeInlayParameterNameHints = "all";
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false;
+                includeInlayFunctionParameterTypeHints = true;
+                includeInlayVariableTypeHints = true;
+                includeInlayPropertyDeclarationTypeHints = true;
+                includeInlayFunctionLikeReturnTypeHints = true;
+                includeInlayEnumMemberValueHints = true;
+              };
+            };
+            javascript = {
+              inlayHints = {
+                includeInlayParameterNameHints = "all";
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false;
+                includeInlayFunctionParameterTypeHints = true;
+                includeInlayVariableTypeHints = true;
+                includeInlayPropertyDeclarationTypeHints = true;
+                includeInlayFunctionLikeReturnTypeHints = true;
+                includeInlayEnumMemberValueHints = true;
+              };
+            };
+          };
+        };
+
+        # Lua
+        lua_ls = {
+          enable = true;
+          settings = {
+            Lua = {
+              runtime = {
+                version = "LuaJIT";
+              };
+              diagnostics = {
+                globals = [ "vim" ];
+              };
+              workspace = {
+                library = {
+                  "\${3rd}/luv/library" = true;
+                  "\${3rd}/busted/library" = true;
+                };
+                checkThirdParty = false;
+              };
+              telemetry = {
+                enable = false;
+              };
+            };
+          };
+        };
+
+        # Haskell
+        hls = {
+          enable = true;
+          installGhc = true;
+          settings = {
+            haskell = {
+              cabalConfigOptions = [ ];
+              checkParents = "CheckOnSave";
+              checkProject = true;
+              maxProblemSeverity = "Error";
+            };
+          };
+        };
+
+        # Terraform
+        terraformls = {
+          enable = true;
+          settings = {
+            terraform = {
+              timeout = "30s";
+            };
+          };
+        };
+
+        # Elixir
+        elixirls = {
+          enable = true;
+          settings = {
+            elixirLS = {
+              dialyzerEnabled = false;
+              fetchDeps = false;
+            };
+          };
+        };
+
         # Gleam
         gleam = {
           enable = true;
@@ -211,6 +300,16 @@
           "lua"
           "vim"
           "markdown"
+          "javascript"
+          "typescript"
+          "tsx"
+          "haskell"
+          "terraform"
+          "hcl"
+          "elixir"
+          "erlang"
+          "eex"
+          "heex"
         ];
       };
     };
