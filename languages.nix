@@ -34,9 +34,6 @@
     
     # Elixir/Erlang Runtime (for elixirls LSP)
     elixir elixir_ls rebar3 hex
-    
-    # SQL Databases (for sqlls LSP)
-    sqlite postgresql_15 mysql80 sqlfluff
     # Docker & Container Tools (for dockerls/yamlls LSP)
     docker docker-compose
     # Kubernetes Tools (for yamlls LSP with k8s schemas)
