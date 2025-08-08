@@ -3,15 +3,27 @@
     # Completion engine (updated API)
     cmp = {
       enable = true;
-      
+
       settings = {
-        # Completion sources in priority order
+        # Completion sources in priority order for code files
         sources = [
-          { name = "nvim_lsp"; }
-          { name = "luasnip"; }
-          { name = "buffer"; }
-          { name = "path"; }
-          { name = "cmdline"; }
+          {
+            name = "nvim_lsp";
+            priority = 1000;
+          }
+          {
+            name = "luasnip";
+            priority = 750;
+          }
+          {
+            name = "buffer";
+            priority = 500;
+            keyword_length = 0;
+          }
+          {
+            name = "path";
+            priority = 250;
+          }
         ];
 
         # Snippet configuration
@@ -25,11 +37,16 @@
           "<C-f>" = "cmp.mapping.scroll_docs(4)";
           "<C-Space>" = "cmp.mapping.complete()";
           "<C-e>" = "cmp.mapping.abort()";
-          "<CR>" = "cmp.mapping.confirm({ select = true })";
+
+          # Alt+j/k for navigation (vim-like)
+          "<M-j>" = "cmp.mapping.select_next_item()";
+          "<M-k>" = "cmp.mapping.select_prev_item()";
+
+          # Tab to confirm selection when menu is visible
           "<Tab>" = ''
             cmp.mapping(function(fallback)
               if cmp.visible() then
-                cmp.select_next_item()
+                cmp.confirm({ select = true })
               elseif require('luasnip').expand_or_jumpable() then
                 require('luasnip').expand_or_jump()
               else
@@ -37,17 +54,20 @@
               end
             end, { "i", "s" })
           '';
+
+          # Shift+Tab for snippet jumping back
           "<S-Tab>" = ''
             cmp.mapping(function(fallback)
-              if cmp.visible() then
-                cmp.select_prev_item()
-              elseif require('luasnip').jumpable(-1) then
+              if require('luasnip').jumpable(-1) then
                 require('luasnip').jump(-1)
               else
                 fallback()
               end
             end, { "i", "s" })
           '';
+
+          # Enter for confirmation (optional, more explicit)
+          "<CR>" = "cmp.mapping.confirm({ select = false })";
         };
 
         # Completion window styling
@@ -72,14 +92,17 @@
                 luasnip = "[Snippet]",
                 buffer = "[Buffer]",
                 path = "[Path]",
-                cmdline = "[CMD]",
-                calc = "[Calc]",
-                emoji = "[Emoji]",
-                treesitter = "[TS]",
               })[entry.source.name]
               return vim_item
             end
           '';
+        };
+
+        # Performance settings
+        performance = {
+          debounce = 60;
+          throttle = 30;
+          fetching_timeout = 500;
         };
       };
     };
@@ -132,61 +155,80 @@
       TypeParameter = "󰅲",
     }
 
-    -- Set up completion for specific filetypes
     local cmp = require('cmp')
-    
-    -- Command line completion
+
+    -- SEPARATE: Command line completion (VIM COMMANDS ONLY)
     cmp.setup.cmdline(':', {
-      mapping = cmp.mapping.preset.cmdline(),
+      mapping = cmp.mapping.preset.cmdline({
+        ['<M-j>'] = cmp.mapping.select_next_item(),
+        ['<M-k>'] = cmp.mapping.select_prev_item(),
+        ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+      }),
       sources = cmp.config.sources({
-        { name = 'path' }
+        { name = 'path', priority = 1000 }
       }, {
-        { name = 'cmdline' }
-      })
+        { name = 'cmdline', priority = 500 }
+      }),
+      -- Only show vim commands, not LSP stuff
+      completion = {
+        autocomplete = { 
+          require('cmp.types').cmp.TriggerEvent.TextChanged 
+        },
+      },
     })
-    
-    -- Search completion  
+
+    -- SEPARATE: Search completion (BUFFER SEARCH ONLY)
     cmp.setup.cmdline({'/', '?'}, {
-      mapping = cmp.mapping.preset.cmdline(),
+      mapping = cmp.mapping.preset.cmdline({
+        ['<M-j>'] = cmp.mapping.select_next_item(),
+        ['<M-k>'] = cmp.mapping.select_prev_item(),
+        ['<Tab>'] = cmp.mapping.confirm({ select = true }),
+      }),
       sources = {
         { name = 'buffer' }
       }
     })
-    
-    -- Language-specific completion tweaks
+
+    -- Language-specific completion tweaks (LANGUAGE STUFF ONLY)
     cmp.setup.filetype('terraform', {
       sources = cmp.config.sources({
-        { name = 'nvim_lsp' },
-        { name = 'buffer' },
-        { name = 'path' }
+        { name = 'nvim_lsp', priority = 1000 },
+        { name = 'luasnip', priority = 750 },
+        { name = 'buffer', priority = 500, keyword_length = 3 },
+        { name = 'path', priority = 250 }
       })
     })
-    
+
     cmp.setup.filetype('elixir', {
       sources = cmp.config.sources({
-        { name = 'nvim_lsp' },
-        { name = 'luasnip' },
-        { name = 'buffer' },
-        { name = 'path' }
+        { name = 'nvim_lsp', priority = 1000 },
+        { name = 'luasnip', priority = 750 },
+        { name = 'buffer', priority = 500, keyword_length = 3 },
+        { name = 'path', priority = 250 }
       })
     })
-    
+
     cmp.setup.filetype('haskell', {
       sources = cmp.config.sources({
-        { name = 'nvim_lsp' },
-        { name = 'luasnip' },
-        { name = 'buffer' },
-        { name = 'path' }
+        { name = 'nvim_lsp', priority = 1000 },
+        { name = 'luasnip', priority = 750 },
+        { name = 'buffer', priority = 500, keyword_length = 3 },
+        { name = 'path', priority = 250 }
       })
     })
-    
+
     cmp.setup.filetype('lua', {
       sources = cmp.config.sources({
-        { name = 'nvim_lsp' },
-        { name = 'luasnip' },
-        { name = 'buffer' },
-        { name = 'path' }
+        { name = 'nvim_lsp', priority = 1000 },
+        { name = 'luasnip', priority = 750 },
+        { name = 'buffer', priority = 500, keyword_length = 3 },
+        { name = 'path', priority = 250 }
       })
+    })
+
+    -- Disable completion in certain contexts to avoid interference
+    cmp.setup.filetype('TelescopePrompt', {
+      enabled = false
     })
   '';
 }
