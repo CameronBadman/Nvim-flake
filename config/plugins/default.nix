@@ -9,5 +9,7 @@
     ./lsp.nix
     ./cmp.nix
     ./trouble.nix
+    ./autopairs.nix
+    ./alpha.nix
   ];
 }
