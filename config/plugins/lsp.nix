@@ -3,13 +3,18 @@
     # LSP Configuration
     lsp = {
       enable = true;
-      
+
       # Language servers
       servers = {
         # C/C++
         clangd = {
           enable = true;
-          cmd = [ "clangd" "--background-index" "--clang-tidy" "--header-insertion=iwyu" ];
+          cmd = [
+            "clangd"
+            "--background-index"
+            "--clang-tidy"
+            "--header-insertion=iwyu"
+          ];
         };
 
         # Rust
@@ -167,8 +172,10 @@
             yaml = {
               schemas = {
                 "https://json.schemastore.org/github-workflow.json" = "/.github/workflows/*";
-                "https://raw.githubusercontent.com/instrumenta/kubernetes-json-schema/master/v1.18.0-standalone-strict/all.json" = "/*.k8s.yaml";
-                "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" = "/docker-compose*.yml";
+                "https://raw.githubusercontent.com/instrumenta/kubernetes-json-schema/master/v1.18.0-standalone-strict/all.json" =
+                  "/*.k8s.yaml";
+                "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json" =
+                  "/docker-compose*.yml";
               };
             };
           };
@@ -220,7 +227,7 @@
         silent = true;
         lspBuf = {
           gd = "definition";
-          gD = "declaration"; 
+          gD = "declaration";
           gi = "implementation";
           gt = "type_definition";
           gr = "references";
@@ -231,18 +238,16 @@
           "<leader>f" = "format";
         };
         diagnostic = {
-          "<leader>e" = "open_float";
+          "<leader>d" = "open_float"; # Changed from <leader>e to <leader>d
           "[d" = "goto_prev";
           "]d" = "goto_next";
           "<leader>q" = "setloclist";
         };
-      };
-
-      # LSP UI enhancements
+      }; # LSP UI enhancements
       onAttach = ''
         -- Enable completion triggered by <c-x><c-o>
         vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-        
+
         -- Highlight symbol under cursor
         if client.server_capabilities.documentHighlightProvider then
           vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
