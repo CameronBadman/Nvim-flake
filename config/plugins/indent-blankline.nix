@@ -3,20 +3,45 @@
     enable = true;
     settings = {
       indent = {
-        char = "│";
-        tab_char = "│";
+        char = "▏";
+        tab_char = "▏";
       };
       scope = {
         enabled = true;
-        char = "│";
+        char = "▎";
         show_start = true;
-        show_end = false;
+        show_end = true;
+        show_exact_scope = true;
         injected_languages = false;
         highlight = [
           "Function"
           "Label"
+          "Conditional"
+          "Repeat"
+          "Keyword"
         ];
-        priority = 500;
+        include = {
+          node_type = {
+            "*" = [
+              "class"
+              "return_statement"
+              "function"
+              "method"
+              "^if"
+              "^while"
+              "^for"
+              "^object"
+              "^table"
+              "arguments"
+              "parameter_list"
+              "element"
+              "block"
+              "dictionary"
+              "array"
+            ];
+          };
+        };
+        priority = 1000;
       };
       exclude = {
         filetypes = [
@@ -31,6 +56,14 @@
           "notify"
           "toggleterm"
           "lazyterm"
+          "TelescopePrompt"
+          "lspinfo"
+          "packer"
+          "checkhealth"
+          "man"
+          "gitcommit"
+          "TelescopeResults"
+          "oil"
         ];
         buftypes = [
           "terminal"
