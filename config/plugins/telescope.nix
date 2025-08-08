@@ -1,7 +1,7 @@
 {
   plugins.telescope = {
     enable = true;
-    
+
     settings = {
       defaults = {
         file_ignore_patterns = [
@@ -15,7 +15,7 @@
         set_env.COLORTERM = "truecolor";
       };
     };
-    
+
     extensions = {
       file-browser.enable = true;
       fzf-native.enable = true;

@@ -1,7 +1,7 @@
 {
   plugins.lualine = {
     enable = true;
-    
+
     settings = {
       options = {
         theme = "kanagawa";
@@ -15,10 +15,10 @@
         };
         globalstatus = true;
       };
-      
+
       sections = {
         lualine_a = [ "mode" ];
-        lualine_b = [ 
+        lualine_b = [
           "branch"
           "diff"
         ];
@@ -27,7 +27,7 @@
         lualine_y = [ "progress" ];
         lualine_z = [ "location" ];
       };
-      
+
       inactive_sections = {
         lualine_a = [ ];
         lualine_b = [ ];

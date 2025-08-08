@@ -1,13 +1,13 @@
 {
   plugins.trouble = {
     enable = true;
-    
+
     settings = {
       auto_close = false;
       auto_open = false;
       auto_preview = true;
       auto_refresh = true;
-      auto_jump = false;  # Fixed: should be boolean, not list
+      auto_jump = false;
       focus = true;
       restore = true;
       follow = true;
