@@ -11,5 +11,7 @@
     ./trouble.nix
     ./autopairs.nix
     ./alpha.nix
+    ./indent-blankline.nix
+    ./comment.nix
   ];
 }
