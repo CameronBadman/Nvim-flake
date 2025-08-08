@@ -11,7 +11,6 @@
     pkg-config
     gdb
     lldb
-    valgrind
     # Rust Toolchain (for rust_analyzer LSP)
     rustc
     cargo
@@ -79,14 +78,10 @@
     rebar3
     hex
 
-    # SQL Databases (for sqlls LSP)
-    sqlite
-    postgresql_15
-    mysql80
-    sqlfluff
     # Docker & Container Tools (for dockerls/yamlls LSP)
     docker
     docker-compose
+
     # Kubernetes Tools (for yamlls LSP with k8s schemas)
     kubectl
     # General Development Tools
