@@ -18,6 +18,7 @@
         enabled = true;
       };
       useLibuvFileWatcher = true;
+      groupEmptyDirs = true;
     };
   };
   keymaps = [
