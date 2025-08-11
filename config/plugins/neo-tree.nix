@@ -3,8 +3,8 @@
     enable = true;
     closeIfLastWindow = true;
     window = {
-      width = 30;
-      autoExpandWidth = false;
+      width = 50;
+      autoExpandWidth = true;
     };
     buffers = {
       bindToCwd = false;
@@ -20,7 +20,6 @@
       useLibuvFileWatcher = true;
     };
   };
-
   keymaps = [
     {
       mode = "n";
