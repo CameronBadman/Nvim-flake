@@ -15,5 +15,7 @@
     scrolloff = 8;
     signcolumn = "yes";
     updatetime = 50;
+    undofile = true;
+    smartcase = true;
   };
 }
