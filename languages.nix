@@ -32,7 +32,6 @@
     golangci-lint
     delve
     # Java Runtime (for jdtls LSP)
-    junit
     jdk21
     maven
     gradle

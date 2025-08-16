@@ -6,7 +6,7 @@
     ./telescope.nix
     ./fugitive.nix
     ./lualine.nix
-    ./lsp.nix
+    ./lsp
     ./cmp.nix
     ./trouble.nix
     ./autopairs.nix
