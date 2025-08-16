@@ -3,7 +3,7 @@
     enable = true;
     closeIfLastWindow = true;
     window = {
-      width = 50;
+      width = 30;
       autoExpandWidth = true;
     };
     buffers = {
