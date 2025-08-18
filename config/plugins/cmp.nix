@@ -10,6 +10,8 @@
           {
             name = "nvim_lsp";
             priority = 1000;
+            # IMPORTANT: Allow longer completion items for Java imports
+            max_item_count = 50;
           }
           {
             name = "luasnip";
@@ -18,7 +20,7 @@
           {
             name = "buffer";
             priority = 500;
-            keyword_length = 0;
+            keyword_length = 2;  # Reduced from 0 for better performance
           }
           {
             name = "path";
@@ -66,7 +68,7 @@
             end, { "i", "s" })
           '';
 
-          # Enter for confirmation (optional, more explicit)
+          # Enter for confirmation
           "<CR>" = "cmp.mapping.confirm({ select = false })";
         };
 
@@ -75,10 +77,12 @@
           completion = {
             border = "rounded";
             winhighlight = "Normal:CmpPmenu,CursorLine:CmpSel,Search:PmenuSel";
+            max_height = 20;  # Show more items for Java imports
           };
           documentation = {
             border = "rounded";
             winhighlight = "Normal:CmpDoc";
+            max_height = 15;
           };
         };
 
@@ -93,16 +97,29 @@
                 buffer = "[Buffer]",
                 path = "[Path]",
               })[entry.source.name]
+              
+              -- Truncate long Java class names but keep them readable
+              if vim_item.kind == "Class" or vim_item.kind == "Method" then
+                if string.len(vim_item.abbr) > 50 then
+                  vim_item.abbr = string.sub(vim_item.abbr, 1, 47) .. "..."
+                end
+              end
+              
               return vim_item
             end
           '';
         };
 
-        # Performance settings
+        # Performance settings - tuned for Java LSP
         performance = {
-          debounce = 60;
-          throttle = 30;
-          fetching_timeout = 500;
+          debounce = 100;  # Slightly higher for Java LSP
+          throttle = 50;
+          fetching_timeout = 1000;  # Longer timeout for Java imports
+        };
+
+        # IMPORTANT: Enable experimental features for better LSP integration
+        experimental = {
+          ghost_text = true;
         };
       };
     };
@@ -157,7 +174,34 @@
 
     local cmp = require('cmp')
 
-    -- SEPARATE: Command line completion (VIM COMMANDS ONLY)
+    -- JAVA-SPECIFIC: Enhanced completion for Java files
+    cmp.setup.filetype('java', {
+      sources = cmp.config.sources({
+        { 
+          name = 'nvim_lsp', 
+          priority = 1000,
+          max_item_count = 100,  -- More items for Java imports
+          keyword_length = 1,    -- Shorter keyword length for Java
+        },
+        { name = 'luasnip', priority = 750 },
+        { 
+          name = 'buffer', 
+          priority = 500, 
+          keyword_length = 3,
+          max_item_count = 10,   -- Fewer buffer items to prioritize LSP
+        },
+        { name = 'path', priority = 250 }
+      }),
+      -- Custom completion behavior for Java
+      completion = {
+        autocomplete = { 
+          require('cmp.types').cmp.TriggerEvent.TextChanged,
+        },
+        keyword_length = 1,  -- Start completing after 1 character
+      },
+    })
+
+    -- Command line completion (VIM COMMANDS ONLY)
     cmp.setup.cmdline(':', {
       mapping = cmp.mapping.preset.cmdline({
         ['<M-j>'] = cmp.mapping.select_next_item(),
@@ -169,15 +213,9 @@
       }, {
         { name = 'cmdline', priority = 500 }
       }),
-      -- Only show vim commands, not LSP stuff
-      completion = {
-        autocomplete = { 
-          require('cmp.types').cmp.TriggerEvent.TextChanged 
-        },
-      },
     })
 
-    -- SEPARATE: Search completion (BUFFER SEARCH ONLY)
+    -- Search completion (BUFFER SEARCH ONLY)
     cmp.setup.cmdline({'/', '?'}, {
       mapping = cmp.mapping.preset.cmdline({
         ['<M-j>'] = cmp.mapping.select_next_item(),
@@ -189,46 +227,44 @@
       }
     })
 
-    -- Language-specific completion tweaks (LANGUAGE STUFF ONLY)
-    cmp.setup.filetype('terraform', {
-      sources = cmp.config.sources({
-        { name = 'nvim_lsp', priority = 1000 },
-        { name = 'luasnip', priority = 750 },
-        { name = 'buffer', priority = 500, keyword_length = 3 },
-        { name = 'path', priority = 250 }
+    -- Other language-specific completion tweaks
+    for _, lang in ipairs({'terraform', 'elixir', 'haskell', 'lua'}) do
+      cmp.setup.filetype(lang, {
+        sources = cmp.config.sources({
+          { name = 'nvim_lsp', priority = 1000 },
+          { name = 'luasnip', priority = 750 },
+          { name = 'buffer', priority = 500, keyword_length = 3 },
+          { name = 'path', priority = 250 }
+        })
       })
-    })
+    end
 
-    cmp.setup.filetype('elixir', {
-      sources = cmp.config.sources({
-        { name = 'nvim_lsp', priority = 1000 },
-        { name = 'luasnip', priority = 750 },
-        { name = 'buffer', priority = 500, keyword_length = 3 },
-        { name = 'path', priority = 250 }
-      })
-    })
-
-    cmp.setup.filetype('haskell', {
-      sources = cmp.config.sources({
-        { name = 'nvim_lsp', priority = 1000 },
-        { name = 'luasnip', priority = 750 },
-        { name = 'buffer', priority = 500, keyword_length = 3 },
-        { name = 'path', priority = 250 }
-      })
-    })
-
-    cmp.setup.filetype('lua', {
-      sources = cmp.config.sources({
-        { name = 'nvim_lsp', priority = 1000 },
-        { name = 'luasnip', priority = 750 },
-        { name = 'buffer', priority = 500, keyword_length = 3 },
-        { name = 'path', priority = 250 }
-      })
-    })
-
-    -- Disable completion in certain contexts to avoid interference
+    -- Disable completion in certain contexts
     cmp.setup.filetype('TelescopePrompt', {
       enabled = false
+    })
+
+    -- IMPORTANT: Auto-trigger completion for Java imports
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "java",
+      callback = function()
+        -- Force completion to trigger more aggressively for Java
+        vim.api.nvim_create_autocmd({"TextChangedI", "TextChangedP"}, {
+          buffer = 0,
+          callback = function()
+            local line = vim.api.nvim_get_current_line()
+            local col = vim.api.nvim_win_get_cursor(0)[2]
+            local before_cursor = string.sub(line, 1, col)
+            
+            -- Trigger completion after typing class names or method calls
+            if string.match(before_cursor, "%w+$") or string.match(before_cursor, "%.%w*$") then
+              if not cmp.visible() then
+                cmp.complete()
+              end
+            end
+          end,
+        })
+      end,
     })
   '';
 }

@@ -8,11 +8,11 @@
       runtimes = [
         {
           name = "JavaSE-11";
-          path = "/usr/lib/jvm/java-11-openjdk/"; # Adjust path as needed
+          path = "/usr/lib/jvm/java-11-openjdk/";
         }
         {
           name = "JavaSE-17";
-          path = "/usr/lib/jvm/java-17-openjdk/"; # Adjust path as needed
+          path = "/usr/lib/jvm/java-17-openjdk/";
         }
       ];
     };
@@ -25,16 +25,17 @@
           updateSnapshots = false;
         };
 
-        # Configure completion
+        # Configure completion with better import settings
         completion = {
           favoriteStaticMembers = [
             "org.hamcrest.MatcherAssert.assertThat"
             "org.hamcrest.Matchers.*"
             "org.hamcrest.CoreMatchers.*"
             "org.junit.jupiter.api.Assertions.*"
+            "org.junit.Assert.*"  # JUnit 4 support
+            "org.mockito.Mockito.*"
             "java.util.Objects.requireNonNull"
             "java.util.Objects.requireNonNullElse"
-            "org.mockito.Mockito.*"
           ];
           filteredTypes = [
             "com.sun.*"
@@ -49,6 +50,10 @@
             "com"
             "org"
           ];
+          # IMPORTANT: Enable import suggestions
+          enabled = true;
+          overwrite = true;
+          guessMethodArguments = true;
         };
 
         # Enable automatic organization of imports
@@ -118,7 +123,7 @@
           };
         };
 
-        # Content assist settings
+        # Content assist settings - CRITICAL for imports
         contentProvider = {
           preferred = "fernflower";
         };
@@ -126,6 +131,17 @@
         # Eclipse settings
         eclipse = {
           downloadSources = true;
+        };
+
+        # IMPORTANT: Configure auto-import settings
+        codeGeneration = {
+          generateComments = true;
+          useBlocks = true;
+        };
+
+        # Enable auto-import suggestions
+        autobuild = {
+          enabled = true;
         };
 
         # Configure workspace
@@ -138,6 +154,24 @@
             "sun.*"
           ];
         };
+
+        # CRITICAL: Enable quick fixes and code actions for imports
+        codeAction = {
+          sortMembers = {
+            avoidVolatileChanges = true;
+          };
+        };
+
+        # Auto-import settings
+        imports = {
+          gradle = {
+            enabled = true;
+          };
+          maven = {
+            enabled = true;
+          };
+          includeDecompiledSources = true;
+        };
       };
     };
 
@@ -148,7 +182,7 @@
       settings = {
         java = {
           autobuild = {
-            enabled = false;
+            enabled = true;  # Changed to true
           };
           maxConcurrentBuilds = 1;
         };
@@ -169,4 +203,6 @@
       "--jvm-arg=java.base/java.lang=ALL-UNNAMED"
     ];
   };
+
+
 }
