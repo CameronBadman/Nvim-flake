@@ -47,7 +47,7 @@
               pkgs = pkgs-unfree;
               module = [
                 ./config
-                ./languages.nix
+                ./languages
               ];
             };
           };
@@ -63,7 +63,7 @@
         nixvimModule = ./config;
 
         # Export the extraPackages directly
-        extraPackages = pkgs: (import ./languages.nix { inherit pkgs; }).extraPackages;
+        extraPackages = pkgs: (import ./languages { inherit pkgs; }).extraPackages;
       };
     };
 }
