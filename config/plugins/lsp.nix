@@ -55,14 +55,33 @@
       require('lspconfig').util.default_config,
       { capabilities = capabilities }
     )
-
-    -- Configure diagnostics globally
+    
+    -- Configure diagnostics globally (modern approach)
     vim.diagnostic.config({
       virtual_text = {
         prefix = "●",
         severity = { min = vim.diagnostic.severity.ERROR },
       },
-      signs = true,
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = " ",
+          [vim.diagnostic.severity.WARN] = " ",
+          [vim.diagnostic.severity.HINT] = " ",
+          [vim.diagnostic.severity.INFO] = " ",
+        },
+        texthl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        },
+        numhl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        },
+      },
       underline = true,
       update_in_insert = false,
       severity_sort = true,
@@ -73,25 +92,13 @@
         prefix = "",
       },
     })
-
+    
     -- Configure LSP UI
     local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
     function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
       opts = opts or {}
       opts.border = opts.border or "rounded"
       return orig_util_open_floating_preview(contents, syntax, opts, ...)
-    end
-
-    -- Diagnostic signs
-    local signs = {
-      Error = " ",
-      Warn = " ",
-      Hint = " ",
-      Info = " "
-    }
-    for type, icon in pairs(signs) do
-      local hl = "DiagnosticSign" .. type
-      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
     end
   '';
 }

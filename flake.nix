@@ -1,3 +1,4 @@
+# flake.nix
 {
   description = "Minimal NixVim configuration flake";
   inputs = {
@@ -22,7 +23,6 @@
         "x86_64-darwin"
         "aarch64-darwin"
       ];
-
       perSystem =
         {
           config,
@@ -51,18 +51,17 @@
               ];
             };
           };
-
+          
           devShells.default = pkgs-unfree.mkShell {
             buildInputs = with pkgs-unfree; [
               nixvim.packages.${system}.default
             ];
           };
         };
-
       flake = {
         nixvimModule = ./config;
-
-        # Export the extraPackages directly
+        
+        # Extract all extraPackages from languages/default.nix
         extraPackages = pkgs: (import ./languages { inherit pkgs; }).extraPackages;
       };
     };
