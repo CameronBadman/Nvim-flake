@@ -26,6 +26,7 @@ let
   gleamPackages = getPackagesFromModule ./gleam.nix;
   ocamlPackages = getPackagesFromModule ./ocaml.nix;
   haskellPackages = getPackagesFromModule ./haskell.nix;
+  elixirPackages = getPackagesFromModule ./elixir.nix;
 in
 {
   # Nixvim module imports (for the editor configuration)
@@ -55,13 +56,9 @@ in
     ./gleam.nix
     ./ocaml.nix
     ./haskell.nix
+    ./elixir.nix
     
-    # Comment out languages you don't need:
-    # ./elixir.nix
-    # ./zig.nix
-    # ./kotlin.nix
   ];
-
   # Export all packages for use in flake.nix
   extraPackages = 
     rustPackages ++
@@ -79,5 +76,6 @@ in
     terraformPackages ++
     gleamPackages ++
     ocamlPackages ++
-    haskellPackages;
+    haskellPackages ++
+    elixirPackages;
 }
