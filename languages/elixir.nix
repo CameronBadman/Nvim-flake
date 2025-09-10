@@ -19,8 +19,8 @@
   # };
   
   # Elixir debugging support
-  plugins.dap = {
-    enable = true;
-    extensions.dap-ui.enable = true;
-  };
+  # plugins.dap = {
+  #   enable = true;
+  #   extensions.dap-ui.enable = true;
+  # };
 }
