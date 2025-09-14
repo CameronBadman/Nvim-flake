@@ -27,6 +27,7 @@ let
   ocamlPackages = getPackagesFromModule ./ocaml.nix;
   haskellPackages = getPackagesFromModule ./haskell.nix;
   elixirPackages = getPackagesFromModule ./elixir.nix;
+  kotlinPackages = getPackagesFromModule ./kotlin.nix;
 in
 {
   # Nixvim module imports (for the editor configuration)
@@ -57,6 +58,7 @@ in
     ./ocaml.nix
     ./haskell.nix
     ./elixir.nix
+    ./kotlin.nix
     
   ];
   # Export all packages for use in flake.nix
@@ -74,6 +76,7 @@ in
     yamlPackages ++
     dockerPackages ++
     terraformPackages ++
+    kotlinPackages ++ 
     gleamPackages ++
     ocamlPackages ++
     haskellPackages ++
