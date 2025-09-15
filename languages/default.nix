@@ -11,6 +11,7 @@ let
   
   # Get packages from each language file
   rustPackages = getPackagesFromModule ./rust.nix;
+  latexPackages = getPackagesFromModule ./latex.nix;
   typescriptPackages = getPackagesFromModule ./typescript.nix;
   pythonPackages = getPackagesFromModule ./python.nix;
   goPackages = getPackagesFromModule ./go.nix;
@@ -38,6 +39,7 @@ in
     ./python.nix
     ./go.nix
     ./nix.nix
+    ./latex.nix
     
     # Systems languages
     ./clang.nix
@@ -80,5 +82,6 @@ in
     gleamPackages ++
     ocamlPackages ++
     haskellPackages ++
+    latexPackages ++ 
     elixirPackages;
 }
