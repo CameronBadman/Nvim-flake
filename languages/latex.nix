@@ -8,7 +8,11 @@
     enable = true;
     settings = {
       view_method = "zathura";
+      view_automatic = 1;  # Auto-open PDF viewer
       compiler_method = "latexmk";
+      compiler_latexmk = {
+        continuous = 1;  # Continuous compilation
+      };
     };
   };
   
@@ -17,30 +21,20 @@
   extraPackages = with pkgs; [
     texlive.combined.scheme-full
     texlab
-    latexmk
     zathura
+    tree-sitter
   ];
   
   plugins.treesitter.settings.ensure_installed = [ "latex" ];
   
-  # LaTeX-specific keybinds
+  # Single keybind to start everything
   keymaps = [
     {
       mode = "n";
-      key = "<leader>ll";
+      key = "<leader>c";
       action = "<cmd>VimtexCompile<cr>";
       options = {
-        desc = "Toggle LaTeX compilation";
-        buffer = true;  # Only active in LaTeX files
-      };
-    }
-    {
-      mode = "n";
-      key = "<leader>lv";
-      action = "<cmd>VimtexView<cr>";
-      options = {
-        desc = "View PDF";
-        buffer = true;
+        desc = "Start LaTeX compilation and view";
       };
     }
   ];
