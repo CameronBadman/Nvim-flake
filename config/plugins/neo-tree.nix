@@ -17,6 +17,7 @@
       followCurrentFile = {
         enabled = true;
       };
+      filtered_items.hide_dotfiles = false;
       useLibuvFileWatcher = true;
       groupEmptyDirs = true;
     };
