@@ -10,7 +10,6 @@
         nilness = true;
         unusedvariable = true;
         useany = true;
-        fieldalignment = true;
         composites = true;
         ST1003 = true;
         undeclaredname = true;
