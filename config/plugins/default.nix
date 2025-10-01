@@ -7,6 +7,7 @@
     ./fugitive.nix
     ./lualine.nix
     ./lsp.nix
+    ./nvim-tmux.nix
     ./cmp.nix
     ./trouble.nix
     ./autopairs.nix

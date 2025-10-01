@@ -17,5 +17,41 @@
     updatetime = 50;
     undofile = true;
     smartcase = true;
+    
+    ignorecase = true;
+    cursorline = true;
+    splitright = true;
+    splitbelow = true;
+    mouse = "a";
+    timeoutlen = 700;
+    completeopt = "menu,menuone,noselect";
+    pumheight = 10;
+    conceallevel = 0;
+    fileencoding = "utf-8";
+    laststatus = 3;
+    showmode = false;
+    showtabline = 0;
+    cmdheight = 1;
+    virtualedit = "block";
   };
+
+  globals = {
+    mapleader = " ";
+    maplocalleader = " ";
+  };
+
+  keymaps = [
+    {
+      mode = "n";
+      key = "<leader>q";
+      action = "<cmd>bd<cr>";
+      options = { silent = true; desc = "Close buffer"; };
+    }
+    {
+      mode = "n";
+      key = "<leader>Q";
+      action = "<cmd>qa<cr>";
+      options = { silent = true; desc = "Quit nvim"; };
+    }
+  ];
 }
