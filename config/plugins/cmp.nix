@@ -10,6 +10,10 @@
             max_item_count = 50;
           }
           {
+            name = "nvim_lsp_signature_help";
+            priority = 900;
+          }
+          {
             name = "luasnip";
             priority = 750;
           }
@@ -18,9 +22,6 @@
             priority = 500;
             keyword_length = 3;
             max_item_count = 15;
-            option = {
-              get_bufnrs = "function() return vim.api.nvim_list_bufs() end";
-            };
           }
           {
             name = "path";
@@ -29,6 +30,8 @@
         ];
 
         snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
+
+        preselect = "cmp.PreselectMode.None";
 
         mapping = {
           "<C-b>" = "cmp.mapping.scroll_docs(-4)";
@@ -118,6 +121,7 @@
               
               vim_item.menu = ({
                 nvim_lsp = "[LSP]",
+                nvim_lsp_signature_help = "[Sig]",
                 luasnip = "[Snip]",
                 buffer = "[Buf]",
                 path = "[Path]",
@@ -148,6 +152,14 @@
           ];
           completeopt = "menu,menuone,noinsert";
           keyword_length = 1;
+        };
+
+        matching = {
+          disallow_fuzzy_matching = false;
+          disallow_fullfuzzy_matching = false;
+          disallow_partial_fuzzy_matching = false;
+          disallow_partial_matching = false;
+          disallow_prefix_unmatching = false;
         };
 
         experimental = {
@@ -182,6 +194,7 @@
     };
 
     cmp-nvim-lsp.enable = true;
+    cmp-nvim-lsp-signature-help.enable = true;
     cmp-buffer.enable = true;
     cmp-path.enable = true;
     cmp-cmdline.enable = true;
@@ -190,6 +203,18 @@
 
   extraConfigLua = ''
     local cmp = require('cmp')
+
+    cmp.setup({
+      enabled = function()
+        local context = require('cmp.config.context')
+        if vim.api.nvim_get_mode().mode == 'c' then
+          return true
+        else
+          return not context.in_treesitter_capture("comment")
+            and not context.in_syntax_group("Comment")
+        end
+      end,
+    })
 
     cmp.setup.cmdline(':', {
       mapping = cmp.mapping.preset.cmdline({
