@@ -37,53 +37,50 @@
   };
   
   extraConfigLua = ''
-    local capabilities = require('cmp_nvim_lsp').default_capabilities()
-    
-    vim.lsp.config('*', {
-      capabilities = capabilities,
-    })
-    
-    vim.diagnostic.config({
-      virtual_text = {
-        prefix = "●",
-        severity = { min = vim.diagnostic.severity.ERROR },
+  local capabilities = require('cmp_nvim_lsp').default_capabilities()
+  
+  vim.lsp.config('*', {
+    capabilities = capabilities,
+  })
+  
+  vim.diagnostic.config({
+    virtual_text = true,
+    signs = {
+      text = {
+        [vim.diagnostic.severity.ERROR] = " ",
+        [vim.diagnostic.severity.WARN] = " ",
+        [vim.diagnostic.severity.HINT] = " ",
+        [vim.diagnostic.severity.INFO] = " ",
       },
-      signs = {
-        text = {
-          [vim.diagnostic.severity.ERROR] = " ",
-          [vim.diagnostic.severity.WARN] = " ",
-          [vim.diagnostic.severity.HINT] = " ",
-          [vim.diagnostic.severity.INFO] = " ",
-        },
-        texthl = {
-          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
-        },
-        numhl = {
-          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
-        },
+      texthl = {
+        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
       },
-      underline = true,
-      update_in_insert = false,
-      severity_sort = true,
-      float = {
-        source = "always",
-        border = "rounded",
-        header = "",
-        prefix = "",
+      numhl = {
+        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
       },
-    })
-    
-    local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-    function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-      opts = opts or {}
-      opts.border = opts.border or "rounded"
-      return orig_util_open_floating_preview(contents, syntax, opts, ...)
-    end
-  '';
+    },
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+    float = {
+      source = "always",
+      border = "rounded",
+      header = "",
+      prefix = "",
+    },
+  })
+  
+  local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+  function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+    opts = opts or {}
+    opts.border = opts.border or "rounded"
+    return orig_util_open_floating_preview(contents, syntax, opts, ...)
+  end
+'';
 }
