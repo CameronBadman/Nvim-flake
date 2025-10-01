@@ -54,4 +54,8 @@
       options = { silent = true; desc = "Quit nvim"; };
     }
   ];
+
+  extraConfigVim = ''
+    lua vim.loader.enable()
+  '';
 }
