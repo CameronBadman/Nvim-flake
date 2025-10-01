@@ -1,15 +1,108 @@
 { pkgs, ... }:
 {
-  plugins.lsp.servers.terraformls = {
-    enable = true;
+  plugins.lsp.servers = {
+    terraformls = {
+      enable = true;
+      extraOptions = {
+        settings = {
+          terraform = {
+            timeout = "30s";
+          };
+          terraform-ls = {
+            experimentalFeatures = {
+              validateOnSave = true;
+              prefillRequiredFields = true;
+            };
+          };
+        };
+      };
+    };
+    
+    tflint = {
+      enable = true;
+      extraOptions = {
+        settings = {
+          tflint = {
+            enabled = true;
+            linters = {
+              terraform_deprecated_interpolation = {
+                enabled = true;
+              };
+              terraform_deprecated_index = {
+                enabled = true;
+              };
+              terraform_unused_declarations = {
+                enabled = true;
+              };
+              terraform_comment_syntax = {
+                enabled = true;
+              };
+              terraform_documented_outputs = {
+                enabled = true;
+              };
+              terraform_documented_variables = {
+                enabled = true;
+              };
+              terraform_typed_variables = {
+                enabled = true;
+              };
+              terraform_module_pinned_source = {
+                enabled = true;
+              };
+              terraform_naming_convention = {
+                enabled = true;
+              };
+              terraform_required_version = {
+                enabled = true;
+              };
+              terraform_required_providers = {
+                enabled = true;
+              };
+              terraform_standard_module_structure = {
+                enabled = true;
+              };
+              terraform_workspace_remote = {
+                enabled = true;
+              };
+            };
+          };
+        };
+      };
+    };
   };
 
   plugins.conform-nvim.settings.formatters_by_ft.terraform = [ "terraform_fmt" ];
+  
+  plugins.lint = {
+    enable = true;
+    lintersByFt = {
+      terraform = [ "tflint" ];
+      tf = [ "tflint" ];
+    };
+  };
 
   extraPackages = with pkgs; [
     terraform
     terraform-ls
+    tflint
   ];
 
   plugins.treesitter.settings.ensure_installed = [ "terraform" "hcl" ];
+
+  extraConfigLua = ''
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = { "*.tf", "*.tfvars" },
+      callback = function()
+        vim.lsp.buf.format({ async = false })
+      end,
+    })
+    
+    vim.filetype.add({
+      extension = {
+        tf = "terraform",
+        tfvars = "terraform",
+        tfstate = "json",
+      },
+    })
+  '';
 }
