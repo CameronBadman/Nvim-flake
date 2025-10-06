@@ -5,13 +5,14 @@
     extraOptions = {
       settings = {
         elixirLS = {
-          dialyzerEnabled = true;
+          dialyzerEnabled = false;
           fetchDeps = false;
           enableTestLenses = true;
           suggestSpecs = true;
           signatureAfterComplete = true;
           autoInsertRequiredAlias = true;
           mixEnv = "dev";
+          incrementalDialyzer = false;
         };
       };
     };
@@ -26,6 +27,7 @@
   extraPackages = with pkgs; [
     elixir
     elixir-ls
+    inotify-tools
   ];
   
   plugins.treesitter.settings.ensure_installed = [ 
