@@ -70,8 +70,12 @@
       };
     };
   };
-
-  plugins.conform-nvim.settings.formatters_by_ft.terraform = [ "terraform_fmt" ];
+  
+  plugins.conform-nvim.settings.formatters_by_ft = {
+    terraform = [ "terraform_fmt" ];
+    tf = [ "terraform_fmt" ];
+    hcl = [ "terraform_fmt" ];
+  };
   
   plugins.lint = {
     enable = true;
@@ -80,23 +84,16 @@
       tf = [ "tflint" ];
     };
   };
-
+  
   extraPackages = with pkgs; [
     terraform
     terraform-ls
     tflint
   ];
-
+  
   plugins.treesitter.settings.ensure_installed = [ "terraform" "hcl" ];
-
+  
   extraConfigLua = ''
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = { "*.tf", "*.tfvars" },
-      callback = function()
-        vim.lsp.buf.format({ async = false })
-      end,
-    })
-    
     vim.filetype.add({
       extension = {
         tf = "terraform",

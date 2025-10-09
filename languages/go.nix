@@ -62,6 +62,8 @@
     impl
     gotests
     iferr
+    goimports
+    gofumpt
   ];
   
   plugins.treesitter.settings.ensure_installed = [ "go" "gomod" "gowork" "gosum" ];

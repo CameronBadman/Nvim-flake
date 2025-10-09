@@ -37,13 +37,6 @@
   ];
   
   extraConfigLua = ''
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = { "*.ex", "*.exs", "*.heex", "*.eex" },
-      callback = function()
-        vim.lsp.buf.format({ async = false })
-      end,
-    })
-    
     vim.api.nvim_create_autocmd("FileType", {
       pattern = { "elixir", "heex", "eex" },
       callback = function()

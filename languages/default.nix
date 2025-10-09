@@ -1,87 +1,66 @@
 { pkgs, ... }:
 let
-  # Helper function to safely extract extraPackages from a language module
-  getPackagesFromModule = modulePath:
-    let
-      module = import modulePath { inherit pkgs; };
-    in
-      if builtins.hasAttr "extraPackages" module 
-      then module.extraPackages 
-      else [];
-  
-  # Get packages from each language file
-  rustPackages = getPackagesFromModule ./rust.nix;
-  latexPackages = getPackagesFromModule ./latex.nix;
-  typescriptPackages = getPackagesFromModule ./typescript.nix;
-  pythonPackages = getPackagesFromModule ./python.nix;
-  goPackages = getPackagesFromModule ./go.nix;
-  javaPackages = getPackagesFromModule ./java.nix;
-  csharpPackages = getPackagesFromModule ./csharp.nix;
-  clangPackages = getPackagesFromModule ./clang.nix;
-  nixPackages = getPackagesFromModule ./nix.nix;
-  luaPackages = getPackagesFromModule ./lua.nix;
-  jsonPackages = getPackagesFromModule ./json.nix;
-  yamlPackages = getPackagesFromModule ./yaml.nix;
-  dockerPackages = getPackagesFromModule ./docker.nix;
-  terraformPackages = getPackagesFromModule ./terraform.nix;
-  gleamPackages = getPackagesFromModule ./gleam.nix;
-  ocamlPackages = getPackagesFromModule ./ocaml.nix;
-  haskellPackages = getPackagesFromModule ./haskell.nix;
-  elixirPackages = getPackagesFromModule ./elixir.nix;
-  kotlinPackages = getPackagesFromModule ./kotlin.nix;
+  rustModule = import ./rust.nix { inherit pkgs; };
+  latexModule = import ./latex.nix { inherit pkgs; };
+  typescriptModule = import ./typescript.nix { inherit pkgs; };
+  pythonModule = import ./python.nix { inherit pkgs; };
+  goModule = import ./go.nix { inherit pkgs; };
+  javaModule = import ./java.nix { inherit pkgs; };
+  csharpModule = import ./csharp.nix { inherit pkgs; };
+  clangModule = import ./clang.nix { inherit pkgs; };
+  nixModule = import ./nix.nix { inherit pkgs; };
+  luaModule = import ./lua.nix { inherit pkgs; };
+  jsonModule = import ./json.nix { inherit pkgs; };
+  yamlModule = import ./yaml.nix { inherit pkgs; };
+  dockerModule = import ./docker.nix { inherit pkgs; };
+  terraformModule = import ./terraform.nix { inherit pkgs; };
+  gleamModule = import ./gleam.nix { inherit pkgs; };
+  ocamlModule = import ./ocaml.nix { inherit pkgs; };
+  haskellModule = import ./haskell.nix { inherit pkgs; };
+  elixirModule = import ./elixir.nix { inherit pkgs; };
+  kotlinModule = import ./kotlin.nix { inherit pkgs; };
 in
 {
-  # Nixvim module imports (for the editor configuration)
   imports = [
-    # Core languages - commonly used
     ./rust.nix
     ./typescript.nix
     ./python.nix
     ./go.nix
     ./nix.nix
     ./latex.nix
-    
-    # Systems languages
     ./clang.nix
     ./java.nix
     ./csharp.nix
-    
-    # Scripting & config
     ./lua.nix
     ./json.nix
     ./yaml.nix
-    
-    # DevOps & Infrastructure  
     ./docker.nix
     ./terraform.nix
-    
-    # Functional languages
     ./gleam.nix
     ./ocaml.nix
     ./haskell.nix
     ./elixir.nix
     ./kotlin.nix
-    
   ];
-  # Export all packages for use in flake.nix
-  extraPackages = 
-    rustPackages ++
-    typescriptPackages ++
-    pythonPackages ++
-    goPackages ++
-    javaPackages ++
-    csharpPackages ++
-    clangPackages ++
-    nixPackages ++
-    luaPackages ++
-    jsonPackages ++
-    yamlPackages ++
-    dockerPackages ++
-    terraformPackages ++
-    kotlinPackages ++ 
-    gleamPackages ++
-    ocamlPackages ++
-    haskellPackages ++
-    latexPackages ++ 
-    elixirPackages;
+  
+  extraPackages = (rustModule.extraPackages or [])
+  ++ (typescriptModule.extraPackages or [])
+  ++ (pythonModule.extraPackages or [])
+  ++ (goModule.extraPackages or [])
+  ++ (javaModule.extraPackages or [])
+  ++ (csharpModule.extraPackages or [])
+  ++ (clangModule.extraPackages or [])
+  ++ (nixModule.extraPackages or [])
+  ++ (luaModule.extraPackages or [])
+  ++ (jsonModule.extraPackages or [])
+  ++ (yamlModule.extraPackages or [])
+  ++ (dockerModule.extraPackages or [])
+  ++ (terraformModule.extraPackages or [])
+  ++ (kotlinModule.extraPackages or [])
+  ++ (gleamModule.extraPackages or [])
+  ++ (ocamlModule.extraPackages or [])
+  ++ (haskellModule.extraPackages or [])
+  ++ (latexModule.extraPackages or [])
+  ++ (elixirModule.extraPackages or []);
+
 }
