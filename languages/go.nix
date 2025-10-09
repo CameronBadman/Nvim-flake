@@ -62,7 +62,6 @@
     impl
     gotests
     iferr
-    goimports
     gofumpt
   ];
   
