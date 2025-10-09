@@ -40,7 +40,7 @@
     python3
     python3Packages.black
     python3Packages.isort
-    python3Packages.ruff
+    ruff
     python3Packages.mypy
     python3Packages.pylint
     python3Packages.pycodestyle
