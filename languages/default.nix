@@ -19,6 +19,26 @@ let
   haskellModule = import ./haskell.nix { inherit pkgs; };
   elixirModule = import ./elixir.nix { inherit pkgs; };
   kotlinModule = import ./kotlin.nix { inherit pkgs; };
+  
+  allPackages = (rustModule.extraPackages or [])
+    ++ (typescriptModule.extraPackages or [])
+    ++ (pythonModule.extraPackages or [])
+    ++ (goModule.extraPackages or [])
+    ++ (javaModule.extraPackages or [])
+    ++ (csharpModule.extraPackages or [])
+    ++ (clangModule.extraPackages or [])
+    ++ (nixModule.extraPackages or [])
+    ++ (luaModule.extraPackages or [])
+    ++ (jsonModule.extraPackages or [])
+    ++ (yamlModule.extraPackages or [])
+    ++ (dockerModule.extraPackages or [])
+    ++ (terraformModule.extraPackages or [])
+    ++ (kotlinModule.extraPackages or [])
+    ++ (gleamModule.extraPackages or [])
+    ++ (ocamlModule.extraPackages or [])
+    ++ (haskellModule.extraPackages or [])
+    ++ (latexModule.extraPackages or [])
+    ++ (elixirModule.extraPackages or []);
 in
 {
   imports = [
@@ -43,24 +63,12 @@ in
     ./kotlin.nix
   ];
   
-  extraPackages = (rustModule.extraPackages or [])
-  ++ (typescriptModule.extraPackages or [])
-  ++ (pythonModule.extraPackages or [])
-  ++ (goModule.extraPackages or [])
-  ++ (javaModule.extraPackages or [])
-  ++ (csharpModule.extraPackages or [])
-  ++ (clangModule.extraPackages or [])
-  ++ (nixModule.extraPackages or [])
-  ++ (luaModule.extraPackages or [])
-  ++ (jsonModule.extraPackages or [])
-  ++ (yamlModule.extraPackages or [])
-  ++ (dockerModule.extraPackages or [])
-  ++ (terraformModule.extraPackages or [])
-  ++ (kotlinModule.extraPackages or [])
-  ++ (gleamModule.extraPackages or [])
-  ++ (ocamlModule.extraPackages or [])
-  ++ (haskellModule.extraPackages or [])
-  ++ (latexModule.extraPackages or [])
-  ++ (elixirModule.extraPackages or []);
-
+  extraPackages = [
+    (pkgs.buildEnv {
+      name = "nvim-language-tools";
+      paths = allPackages;
+      pathsToLink = [ "/bin" "/share/man" "/share/doc" ];
+      ignoreCollisions = false;
+    })
+  ];
 }
