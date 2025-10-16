@@ -17,7 +17,6 @@
 
   extraPackages = with pkgs; [
     lua
-    luajit
     stylua
   ];
 
