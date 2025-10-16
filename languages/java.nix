@@ -88,8 +88,6 @@
 
   extraPackages = with pkgs; [
     jdk21
-    jdk17
-    jdk11
     maven
     gradle
     checkstyle
