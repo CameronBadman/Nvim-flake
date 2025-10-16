@@ -68,7 +68,7 @@ in
       name = "nvim-language-tools";
       paths = allPackages;
       pathsToLink = [ "/bin" "/share/man" "/share/doc" ];
-      ignoreCollisions = false;
+      ignoreCollisions = true;
     })
   ];
 }
