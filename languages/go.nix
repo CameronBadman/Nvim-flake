@@ -58,6 +58,7 @@
     gopls
     golangci-lint
     delve
+    gcc
     gomodifytags
     impl
     gotests
