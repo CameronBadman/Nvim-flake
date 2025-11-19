@@ -33,54 +33,84 @@
       vim.keymap.set('n', '<leader>fm', function()
         vim.lsp.buf.format({ async = true })
       end, opts)
+      
+      if client.server_capabilities.inlayHintProvider then
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        vim.keymap.set('n', '<leader>th', function()
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
+        end, opts)
+      end
+      
+      if client.server_capabilities.codeLensProvider then
+        vim.lsp.codelens.refresh()
+        vim.api.nvim_create_autocmd({"BufEnter", "CursorHold", "InsertLeave"}, {
+          buffer = bufnr,
+          callback = vim.lsp.codelens.refresh,
+        })
+        vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, opts)
+      end
+      
+      if client.server_capabilities.documentHighlightProvider then
+        local highlight_group = vim.api.nvim_create_augroup('LSPDocumentHighlight_' .. bufnr, { clear = true })
+        vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
+          buffer = bufnr,
+          group = highlight_group,
+          callback = vim.lsp.buf.document_highlight,
+        })
+        vim.api.nvim_create_autocmd("CursorMoved", {
+          buffer = bufnr,
+          group = highlight_group,
+          callback = vim.lsp.buf.clear_references,
+        })
+      end
     '';
   };
   
   extraConfigLua = ''
-  local capabilities = require('cmp_nvim_lsp').default_capabilities()
-  
-  vim.lsp.config('*', {
-    capabilities = capabilities,
-  })
-  
-  vim.diagnostic.config({
-    virtual_text = true,
-    signs = {
-      text = {
-        [vim.diagnostic.severity.ERROR] = " ",
-        [vim.diagnostic.severity.WARN] = " ",
-        [vim.diagnostic.severity.HINT] = " ",
-        [vim.diagnostic.severity.INFO] = " ",
+    local capabilities = require('cmp_nvim_lsp').default_capabilities()
+    
+    vim.lsp.config('*', {
+      capabilities = capabilities,
+    })
+    
+    vim.diagnostic.config({
+      virtual_text = true,
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = " ",
+          [vim.diagnostic.severity.WARN] = " ",
+          [vim.diagnostic.severity.HINT] = " ",
+          [vim.diagnostic.severity.INFO] = " ",
+        },
+        texthl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        },
+        numhl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+          [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+          [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+          [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        },
       },
-      texthl = {
-        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+      underline = true,
+      update_in_insert = false,
+      severity_sort = true,
+      float = {
+        source = "always",
+        border = "rounded",
+        header = "",
+        prefix = "",
       },
-      numhl = {
-        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
-      },
-    },
-    underline = true,
-    update_in_insert = false,
-    severity_sort = true,
-    float = {
-      source = "always",
-      border = "rounded",
-      header = "",
-      prefix = "",
-    },
-  })
-  
-  local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-  function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-    opts = opts or {}
-    opts.border = opts.border or "rounded"
-    return orig_util_open_floating_preview(contents, syntax, opts, ...)
-  end
-'';
+    })
+    
+    local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+    function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+      opts = opts or {}
+      opts.border = opts.border or "rounded"
+      return orig_util_open_floating_preview(contents, syntax, opts, ...)
+    end
+  '';
 }

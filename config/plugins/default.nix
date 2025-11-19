@@ -14,5 +14,6 @@
     ./alpha.nix
     ./indent-blankline.nix
     ./comment.nix
+    ./gitsigns.nix
   ];
 }

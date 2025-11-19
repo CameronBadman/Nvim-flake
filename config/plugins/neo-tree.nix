@@ -1,27 +1,29 @@
 {
   plugins.neo-tree = {
     enable = true;
-    closeIfLastWindow = true;
-    window = {
-      width = 30;
-      autoExpandWidth = true;
-    };
-    buffers = {
-      bindToCwd = false;
-      followCurrentFile = {
-        enabled = true;
+    settings = {
+      close_if_last_window = true;
+      window = {
+        width = 30;
+        auto_expand_width = true;
       };
-    };
-    filesystem = {
-      bindToCwd = false;
-      followCurrentFile = {
-        enabled = true;
+      buffers = {
+        bind_to_cwd = false;
+        follow_current_file = {
+          enabled = true;
+        };
       };
-      filteredItems = {
-        hideDotfiles = false;
+      filesystem = {
+        bind_to_cwd = false;
+        follow_current_file = {
+          enabled = true;
+        };
+        filtered_items = {
+          hide_dotfiles = false;
+        };
+        use_libuv_file_watcher = true;
+        group_empty_dirs = true;
       };
-      useLibuvFileWatcher = true;
-      groupEmptyDirs = true;
     };
   };
   keymaps = [

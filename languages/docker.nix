@@ -45,7 +45,7 @@
   extraPackages = with pkgs; [
     docker
     hadolint
-    dockerfile-language-server-nodejs
+    dockerfile-language-server
     docker-compose-language-service
   ];
 
