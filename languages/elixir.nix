@@ -27,7 +27,6 @@
   extraPackages = with pkgs; [
     elixir
     elixir-ls
-    inotify-tools
   ];
   
   plugins.treesitter.settings.ensure_installed = [ 
