@@ -1,35 +1,5 @@
 { pkgs, ... }:
 {
-  plugins.lsp.servers = {
-    docker_compose_language_service = {
-      enable = true;
-      extraOptions = {
-        settings = {
-          docker-compose = {
-            validate = true;
-            completion = true;
-            hover = true;
-          };
-        };
-      };
-    };
-    
-    dockerls = {
-      enable = true;
-      extraOptions = {
-        settings = {
-          docker = {
-            languageserver = {
-              formatter = {
-                ignoreMultilineInstructions = true;
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-
   plugins.conform-nvim.settings.formatters_by_ft = {
     dockerfile = [ "prettier" ];
     yaml = [ "prettier" ];
@@ -45,8 +15,6 @@
   extraPackages = with pkgs; [
     docker
     hadolint
-    dockerfile-language-server
-    docker-compose-language-service
   ];
 
   plugins.treesitter.settings.ensure_installed = [ 
