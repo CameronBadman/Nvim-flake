@@ -1,7 +1,6 @@
 { pkgs, ... }:
 let
   rustModule = import ./rust.nix { inherit pkgs; };
-  latexModule = import ./latex.nix { inherit pkgs; };
   typescriptModule = import ./typescript.nix { inherit pkgs; };
   pythonModule = import ./python.nix { inherit pkgs; };
   goModule = import ./go.nix { inherit pkgs; };
@@ -37,7 +36,6 @@ let
     ++ (gleamModule.extraPackages or [])
     ++ (ocamlModule.extraPackages or [])
     ++ (haskellModule.extraPackages or [])
-    ++ (latexModule.extraPackages or [])
     ++ (elixirModule.extraPackages or []);
 in
 {
@@ -47,7 +45,6 @@ in
     ./python.nix
     ./go.nix
     ./nix.nix
-    ./latex.nix
     ./clang.nix
     ./java.nix
     ./csharp.nix
