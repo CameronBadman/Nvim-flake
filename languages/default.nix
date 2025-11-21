@@ -5,7 +5,6 @@ let
   pythonModule = import ./python.nix { inherit pkgs; };
   goModule = import ./go.nix { inherit pkgs; };
   javaModule = import ./java.nix { inherit pkgs; };
-  csharpModule = import ./csharp.nix { inherit pkgs; };
   clangModule = import ./clang.nix { inherit pkgs; };
   nixModule = import ./nix.nix { inherit pkgs; };
   luaModule = import ./lua.nix { inherit pkgs; };
@@ -24,7 +23,6 @@ let
     ++ (pythonModule.extraPackages or [])
     ++ (goModule.extraPackages or [])
     ++ (javaModule.extraPackages or [])
-    ++ (csharpModule.extraPackages or [])
     ++ (clangModule.extraPackages or [])
     ++ (nixModule.extraPackages or [])
     ++ (luaModule.extraPackages or [])
@@ -47,7 +45,6 @@ in
     ./nix.nix
     ./clang.nix
     ./java.nix
-    ./csharp.nix
     ./lua.nix
     ./json.nix
     ./yaml.nix
