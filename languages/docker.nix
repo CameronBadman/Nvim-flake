@@ -17,9 +17,8 @@
     hadolint
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ 
-    "dockerfile" 
-    "yaml"
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.dockerfile
   ];
 
   extraConfigLua = ''

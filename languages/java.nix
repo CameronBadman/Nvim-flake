@@ -93,7 +93,9 @@
     checkstyle
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "java" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.java
+  ];
 
   # Set Java 21 environment
   extraConfigLua = ''

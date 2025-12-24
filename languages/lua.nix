@@ -20,5 +20,7 @@
     stylua
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "lua" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.lua
+  ];
 }

@@ -17,5 +17,7 @@
     nodePackages.prettier
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "yaml" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.yaml
+  ];
 }

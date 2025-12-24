@@ -13,6 +13,8 @@
     ocamlPackages.ocamlformat
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "ocaml" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.ocaml
+  ];
 }
 

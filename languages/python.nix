@@ -49,7 +49,9 @@
     python3Packages.rope
   ];
   
-  plugins.treesitter.settings.ensure_installed = [ "python" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.python
+  ];
   plugins.dap.enable = true;
   plugins.dap-python.enable = true;
 }

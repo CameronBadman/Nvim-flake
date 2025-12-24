@@ -29,10 +29,10 @@
     elixir-ls
   ];
   
-  plugins.treesitter.settings.ensure_installed = [ 
-    "elixir" 
-    "heex" 
-    "eex" 
+  plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+    elixir
+    heex
+    eex
   ];
   
   extraConfigLua = ''

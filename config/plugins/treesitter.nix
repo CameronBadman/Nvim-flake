@@ -1,7 +1,8 @@
-{ ... }:
+{ pkgs, ... }:
 {
   plugins.treesitter = {
     enable = true;
+    grammarPackages = pkgs.vimPlugins.nvim-treesitter.allGrammars;
     settings = {
       highlight.enable = true;
       indent.enable = true;
@@ -9,8 +10,4 @@
       sync_install = false;
     };
   };
-
-  extraConfigLua = ''
-    vim.opt.runtimepath:append(vim.fn.stdpath("data") .. "/site/parser")
-  '';
 }

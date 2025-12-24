@@ -66,7 +66,11 @@
     gofumpt
   ];
   
-  plugins.treesitter.settings.ensure_installed = [ "go" "gomod" "gowork" "gosum" ];
+  plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+    go
+    gomod
+    gosum
+  ];
   
   plugins.dap-go.enable = true;
   

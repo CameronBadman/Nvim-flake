@@ -14,5 +14,7 @@
     gradle
   ];
   
-  plugins.treesitter.settings.ensure_installed = [ "kotlin" ];
+ plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.kotlin
+  ];
 }

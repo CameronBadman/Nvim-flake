@@ -84,13 +84,13 @@
     nodePackages.typescript-language-server
   ];
   
-  plugins.treesitter.settings.ensure_installed = [ 
-    "typescript" 
-    "javascript" 
-    "tsx" 
-    "jsdoc"
-    "json"
-    "jsonc"
+  plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+    typescript
+    javascript
+    tsx
+    jsdoc
+    json
+    jsonc
   ];
   
   extraConfigLua = ''

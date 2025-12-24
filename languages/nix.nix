@@ -15,5 +15,7 @@
     nixfmt-rfc-style
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "nix" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.nix
+  ];
 }

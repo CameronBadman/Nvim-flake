@@ -91,7 +91,10 @@
     tflint
   ];
   
-  plugins.treesitter.settings.ensure_installed = [ "terraform" "hcl" ];
+  plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+    terraform
+    hcl
+  ];
   
   extraConfigLua = ''
     vim.filetype.add({

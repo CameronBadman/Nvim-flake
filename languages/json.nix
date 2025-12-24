@@ -24,5 +24,8 @@
     nodePackages.prettier
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "json" "jsonc" ];
+  plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+    json
+    jsonc
+  ];
 }

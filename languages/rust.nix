@@ -21,6 +21,7 @@
     clippy
     rust-analyzer
   ];
-
-  plugins.treesitter.settings.ensure_installed = [ "rust" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.rust
+  ];
 }

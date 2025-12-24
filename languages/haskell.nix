@@ -23,6 +23,8 @@
     haskellPackages.cabal-fmt
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "haskell" ];
+  plugins.treesitter.grammarPackages = [
+    pkgs.vimPlugins.nvim-treesitter.builtGrammars.haskell
+  ];
   #plugins.neotest.adapters.haskell.enable = true;
 }

@@ -25,6 +25,9 @@
     lldb
   ];
 
-  plugins.treesitter.settings.ensure_installed = [ "c" "cpp" ];
+  plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+    c
+    cpp
+  ];
   #plugins.dap.extensions.dap-lldb.enable = true;
 }
