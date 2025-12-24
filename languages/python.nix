@@ -50,5 +50,6 @@
   ];
   
   plugins.treesitter.settings.ensure_installed = [ "python" ];
+  plugins.dap.enable = true;
   plugins.dap-python.enable = true;
 }
