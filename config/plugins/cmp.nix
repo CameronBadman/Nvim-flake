@@ -7,7 +7,6 @@
           {
             name = "nvim_lsp";
             priority = 1000;
-            max_item_count = 50;
           }
           {
             name = "nvim_lsp_signature_help";
@@ -138,9 +137,9 @@
         };
 
         performance = {
-          debounce = 150;
-          throttle = 60;
-          fetching_timeout = 500;
+          debounce = 60;
+          throttle = 30;
+          fetching_timeout = 2000;
           confirm_resolve_timeout = 80;
           async_budget = 1;
           max_view_entries = 200;
@@ -245,9 +244,25 @@
       enabled = false
     })
 
-    vim.api.nvim_set_hl(0, 'CmpGhostText', { 
-      link = 'Comment', 
-      default = true 
+    cmp.setup.filetype('go', {
+      sources = cmp.config.sources({
+        {
+          name = 'nvim_lsp',
+          entry_filter = function(entry, ctx)
+            local kind = require('cmp.types').lsp.CompletionItemKind[entry:get_kind()]
+            return true
+          end,
+        }
+      }, {
+        { name = 'luasnip' },
+        { name = 'buffer', keyword_length = 5 },
+        { name = 'path' }
+      })
+    })
+
+    vim.api.nvim_set_hl(0, 'CmpGhostText', {
+      link = 'Comment',
+      default = true
     })
   '';
 }

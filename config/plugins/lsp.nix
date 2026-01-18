@@ -68,11 +68,27 @@
   
   extraConfigLua = ''
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
-    
-    vim.lsp.config('*', {
-      capabilities = capabilities,
-    })
-    
+
+    capabilities.textDocument.completion.completionItem.snippetSupport = true
+    capabilities.textDocument.completion.completionItem.resolveSupport = {
+      properties = {
+        'documentation',
+        'detail',
+        'additionalTextEdits',
+      }
+    }
+
+    local lspconfig = require('lspconfig')
+    local util = require('lspconfig.util')
+
+    local default_setup = lspconfig.util.default_config.on_new_config
+    lspconfig.util.default_config.on_new_config = function(config, root_dir)
+      config.capabilities = vim.tbl_deep_extend('force', config.capabilities or {}, capabilities)
+      if default_setup then
+        default_setup(config, root_dir)
+      end
+    end
+
     vim.diagnostic.config({
       virtual_text = true,
       signs = {
