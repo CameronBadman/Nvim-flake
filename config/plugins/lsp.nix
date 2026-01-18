@@ -90,13 +90,23 @@
     end
 
     vim.diagnostic.config({
-      virtual_text = true,
+      virtual_text = {
+        spacing = 4,
+        source = "always",
+        prefix = "■",
+        severity = {
+          min = vim.diagnostic.severity.HINT,
+        },
+      },
       signs = {
+        severity = {
+          min = vim.diagnostic.severity.HINT,
+        },
         text = {
-          [vim.diagnostic.severity.ERROR] = " ",
-          [vim.diagnostic.severity.WARN] = " ",
-          [vim.diagnostic.severity.HINT] = " ",
-          [vim.diagnostic.severity.INFO] = " ",
+          [vim.diagnostic.severity.ERROR] = "󰅚 ",
+          [vim.diagnostic.severity.WARN] = "󰀪 ",
+          [vim.diagnostic.severity.HINT] = "󰌶 ",
+          [vim.diagnostic.severity.INFO] = "󰋽 ",
         },
         texthl = {
           [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
@@ -110,8 +120,15 @@
           [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
           [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
         },
+        linehl = {
+          [vim.diagnostic.severity.ERROR] = "DiagnosticLineError",
+        },
       },
-      underline = true,
+      underline = {
+        severity = {
+          min = vim.diagnostic.severity.HINT,
+        },
+      },
       update_in_insert = false,
       severity_sort = true,
       float = {
