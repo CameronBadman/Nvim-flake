@@ -1,6 +1,6 @@
 {
   imports = [
-    ./neo-tree.nix
+    ./nvim-tree.nix
     ./treesitter.nix
     ./devicons.nix
     ./telescope.nix
