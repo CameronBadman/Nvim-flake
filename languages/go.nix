@@ -24,7 +24,7 @@
         defers = true;
         directive = true;
         errorsas = true;
-        fieldalignment = true;
+        # fieldalignment removed in gopls v0.17.0 - hover over struct fields instead
         fillreturns = true;
         fillstruct = true;
         httpresponse = true;
@@ -117,7 +117,6 @@
       allExperiments = true;
 
       # Make diagnostics strict and visible
-      noIncrementalSync = false;
       completionBudget = "100ms";
       diagnosticsTrigger = "Edit";
     };
