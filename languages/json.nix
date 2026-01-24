@@ -26,6 +26,6 @@
 
   plugins.treesitter.grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
     json
-    jsonc
+    json5
   ];
 }
