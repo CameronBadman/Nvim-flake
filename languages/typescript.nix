@@ -90,7 +90,7 @@
     tsx
     jsdoc
     json
-    jsonc
+    json5
   ];
   
   extraConfigLua = ''
